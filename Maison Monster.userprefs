@@ -1,9 +1,12 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Floors\Floor.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Rooms\RoomManager.cs">
     <Files>
-      <File FileName="Assets\Floors\Floor.cs" Line="6" Column="1" />
-      <File FileName="..\Runner\Assets\Platform\PlatformManager.cs" Line="5" Column="2" />
+      <File FileName="Assets\GUI\Construction\Guidelines.cs" Line="13" Column="74" />
+      <File FileName="Assets\GUI\Construction\ConstructionGUIManager.cs" Line="15" Column="31" />
+      <File FileName="c:\Users\Jeremi\Desktop\Games Studio\Maison Monster\Assets\Managers\Hotel.cs" Line="10" Column="2" />
+      <File FileName="Assets\Rooms\RoomManager.cs" Line="20" Column="59" />
+      <File FileName="Assets\Rooms\Room.cs" Line="4" Column="13" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

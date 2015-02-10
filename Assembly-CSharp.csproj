@@ -46,7 +46,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Floors\Floor.cs" />
+     <Compile Include="Assets\GUI\Construction\ConstructionGUIManager.cs" />
+     <Compile Include="Assets\GUI\Construction\Guidelines.cs" />
+     <Compile Include="Assets\Managers\GameCamera.cs" />
+     <Compile Include="Assets\Managers\Hotel.cs" />
+     <Compile Include="Assets\Rooms\Room.cs" />
+     <Compile Include="Assets\Rooms\RoomManager.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.1/UnityEngine.UI.dll</HintPath>
  </Reference>
