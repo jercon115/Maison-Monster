@@ -19,10 +19,16 @@ public class RoomManager : MonoBehaviour {
 			cells [x, y].transform.parent = transform;
 			cells [x, y].transform.localPosition =
 				new Vector3 (x * 2.0f + (newroom.width-1), y * 2.0f, 10.0f);
-			Instantiate(ConstructionEffect,cells [x, y].transform.localPosition,Quaternion.identity);
+
+			Vector3 particlePos = new Vector3(cells [x, y].transform.localPosition.x,
+			                                  cells [x, y].transform.localPosition.y, 0.0f);
+
+			Instantiate(ConstructionEffect, particlePos,  Quaternion.identity);
 			for(int i = 1; i < newroom.width; i++) {
 				cells[x + i, y] = cells[x, y];
-				Instantiate(ConstructionEffect,cells [x + i, y].transform.localPosition,Quaternion.identity);
+				particlePos = new Vector3(cells [x, y].transform.localPosition.x,
+				                          cells [x, y].transform.localPosition.y, 0.0f);
+				Instantiate(ConstructionEffect, particlePos, Quaternion.identity);
 			}
 		}
 	}

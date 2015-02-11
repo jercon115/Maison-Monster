@@ -5,7 +5,7 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{0352FB81-4028-B7C5-E444-8BD44A63A8D3}</ProjectGuid>
+	<ProjectGuid>{FDE422D4-077A-D651-F98B-524EA4E9F11A}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
@@ -50,6 +50,7 @@
      <Compile Include="Assets\GUI\Construction\Guidelines.cs" />
      <Compile Include="Assets\Managers\GameCamera.cs" />
      <Compile Include="Assets\Managers\Hotel.cs" />
+     <Compile Include="Assets\Resources\Ground.cs" />
      <Compile Include="Assets\Rooms\Room.cs" />
      <Compile Include="Assets\Rooms\RoomManager.cs" />
      <Compile Include="Assets\SelfDestructParticle.cs" />
