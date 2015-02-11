@@ -4,9 +4,10 @@ using System.Collections;
 
 public class RoomManager : MonoBehaviour {
 
+	public GameObject ConstructionEffect;
 	public Hotel hotel;
 	private Room[,] cells;
-	
+
 	// Use this for initialization
 	public void Start () {
 		cells = new Room[hotel.width, hotel.height];
@@ -18,9 +19,11 @@ public class RoomManager : MonoBehaviour {
 			cells [x, y].transform.parent = transform;
 			cells [x, y].transform.localPosition =
 				new Vector3 (x * 2.0f + (newroom.width-1), y * 2.0f, 10.0f);
-
-			for(int i = 1; i < newroom.width; i++)
+			Instantiate(ConstructionEffect,cells [x, y].transform.localPosition,Quaternion.identity);
+			for(int i = 1; i < newroom.width; i++) {
 				cells[x + i, y] = cells[x, y];
+				Instantiate(ConstructionEffect,cells [x + i, y].transform.localPosition,Quaternion.identity);
+			}
 		}
 	}
 
@@ -40,9 +43,17 @@ public class RoomManager : MonoBehaviour {
 	public bool roomLocationValid(int x, int y, int width) {
 		if (x < 0 || x >= hotel.width-(width-1) || y < 0 || y >= hotel.height)
 			return false;
+
+		bool foundation_exists = false;
 		for(int i = 0; i < width; i++) {
 			if (cells[x + i, y] != null) return false;
+			if (y > 0) {
+				if (cells[x + i, y - 1] != null)
+					foundation_exists = true;
+			} else if (y == 0)
+				foundation_exists = true;
 		}
+		if (!foundation_exists) return false;
 		return true;
 	}
 }
