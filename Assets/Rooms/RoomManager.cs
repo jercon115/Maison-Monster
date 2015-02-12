@@ -20,15 +20,10 @@ public class RoomManager : MonoBehaviour {
 			cells [x, y].transform.localPosition =
 				new Vector3 (x * 2.0f + (newroom.width-1), y * 2.0f, 10.0f);
 
-			Vector3 particlePos = new Vector3(cells [x, y].transform.localPosition.x,
-			                                  cells [x, y].transform.localPosition.y, 0.0f);
-
-			Instantiate(ConstructionEffect, particlePos,  Quaternion.identity);
+			Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f),  Quaternion.identity);
 			for(int i = 1; i < newroom.width; i++) {
 				cells[x + i, y] = cells[x, y];
-				particlePos = new Vector3(cells [x, y].transform.localPosition.x,
-				                          cells [x, y].transform.localPosition.y, 0.0f);
-				Instantiate(ConstructionEffect, particlePos, Quaternion.identity);
+				Instantiate(ConstructionEffect, new Vector3((x+i)*2.0f, y*2.0f, 0.0f), Quaternion.identity);
 			}
 		}
 	}
@@ -39,8 +34,11 @@ public class RoomManager : MonoBehaviour {
 			int startX = Mathf.RoundToInt((cells [x, y].transform.localPosition.x - (width-1))/2.0f);
 
 			Destroy (cells [x, y].gameObject);
-			for (int i = 0; i < width; i++)
-					cells [startX + i, y] = null;
+			Instantiate(ConstructionEffect, new Vector3(startX*2.0f, y*2.0f, 0.0f),  Quaternion.identity);
+			for (int i = 0; i < width; i++) {
+				cells [startX + i, y] = null;
+				Instantiate(ConstructionEffect, new Vector3((startX+i)*2.0f, y*2.0f, 0.0f), Quaternion.identity);
+			}
 
 			print ("Destroyed");
 		}
