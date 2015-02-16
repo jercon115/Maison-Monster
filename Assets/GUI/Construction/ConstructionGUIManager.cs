@@ -56,9 +56,13 @@ public class ConstructionGUIManager : MonoBehaviour {
 			} else if (Input.GetMouseButtonDown (1)) {
 				int x = Mathf.FloorToInt (xTemp);
 
-				print ("X: " + x + "Y: " +y);
-				hotel.roomManager.DeleteRoom (x, y);
-				updateTargetSprite();
+				if (selected == -1) {
+					hotel.roomManager.DeleteRoom (x, y);
+					updateTargetSprite();
+				} else {
+					selected = -1;
+					targetRenderer.sprite = null;
+				}
 			}
 		}
 	}

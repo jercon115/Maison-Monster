@@ -6,7 +6,7 @@ public class RoomManager : MonoBehaviour {
 
 	public GameObject ConstructionEffect;
 	public Hotel hotel;
-	private Room[,] cells;
+	public Room[,] cells;
 
 	// Use this for initialization
 	public void Start () {
@@ -14,22 +14,25 @@ public class RoomManager : MonoBehaviour {
 	}
 
 	public void MakeRoom(int x, int y, Room newroom) {
-		if (roomLocationValid (x, y, newroom.width)) {
+		if (roomLocationValid (x, y, newroom.width) && hotel.gold >= newroom.cost) {
 			cells [x, y] = Instantiate (newroom) as Room;
 			cells [x, y].transform.parent = transform;
 			cells [x, y].transform.localPosition =
 				new Vector3 (x * 2.0f + (newroom.width-1), y * 2.0f, 10.0f);
+			cells [x, y].cellX = x; cells [x, y].cellY = y;
 
 			Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f),  Quaternion.identity);
 			for(int i = 1; i < newroom.width; i++) {
 				cells[x + i, y] = cells[x, y];
 				Instantiate(ConstructionEffect, new Vector3((x+i)*2.0f, y*2.0f, 0.0f), Quaternion.identity);
 			}
+
+			hotel.gold -= newroom.cost;
 		}
 	}
 
 	public void DeleteRoom(int x, int y) {
-		if (cells [x, y] != null) {
+		if (cells [x, y] != null && cells [x, y].monsters.Count == 0) {
 			int width = cells [x, y].width;
 			int startX = Mathf.RoundToInt((cells [x, y].transform.localPosition.x - (width-1))/2.0f);
 

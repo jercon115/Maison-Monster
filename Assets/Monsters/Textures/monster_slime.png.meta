@@ -2,9 +2,12 @@ fileFormatVersion: 2
 guid: 8efaabb6ea39269419d373c43702a244
 TextureImporter:
   fileIDToRecycleName:
-    21300000: monster_slime_idle
-    21300002: monster_slime_move
-    21300004: monster_slime_sleep
+    21300000: monster_slime_0
+    21300002: monster_slime_1
+    21300004: monster_slime_2
+    21300006: monster_slime_3
+    21300008: monster_slime_4
+    21300010: monster_slime_5
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -27,7 +30,7 @@ TextureImporter:
   textureFormat: -1
   maxTextureSize: 1024
   textureSettings:
-    filterMode: -1
+    filterMode: 0
     aniso: 16
     mipBias: -1
     wrapMode: 1
@@ -40,41 +43,71 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 64
+  spritePixelsToUnits: 32
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: monster_slime_idle
+    - name: monster_slime_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: .5, y: .666999996}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: monster_slime_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: .5, y: .666999996}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: monster_slime_2
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 48
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: .5, y: .666999996}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: monster_slime_3
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 96
-        height: 96
-      alignment: 7
-      pivot: {x: .5, y: 0}
+        width: 48
+        height: 48
+      alignment: 9
+      pivot: {x: .5, y: .712351561}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_move
+    - name: monster_slime_4
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: monster_slime_5
       rect:
         serializedVersion: 2
         x: 96
         y: 0
-        width: 96
-        height: 96
-      alignment: 7
-      pivot: {x: .5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_sleep
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 96
-        height: 96
-      alignment: 7
-      pivot: {x: .5, y: 0}
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 
