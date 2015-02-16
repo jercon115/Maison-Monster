@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Room : MonoBehaviour {
-
-	public int width;
+	public int width, height;
 	public int cellX, cellY;
 	public int cost;
 	public int income;
@@ -26,5 +25,9 @@ public class Room : MonoBehaviour {
 		} else {
 			spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
 		}
+	}
+
+	public virtual void Destroy() {
+		Destroy (gameObject);
 	}
 }
