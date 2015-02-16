@@ -16,18 +16,12 @@ public class MonsterManager : MonoBehaviour {
 	}
 
 	void Update () {
-		if (monsters.Count < 10 && spawnDuration <= 0) {
+		if (monsters.Count < 20 && spawnDuration <= 0) {
 			monsters.Add( Instantiate (monsters[0]) as Monster );
 			monsters [monsters.Count - 1].monsterManager = this;
-			monsters [monsters.Count - 1].hotelWidth = hotel.width;
-			float randomX = -2.5f;
-			if (Random.Range(0, 2) == 0) {
-				randomX = 2.0f * hotel.width + 1.0f;
-				monsters[monsters.Count-1].transform.localScale = new Vector3 (-monsters[monsters.Count-1].transform.localScale.x, 1, 1);
-			}
-			monsters[monsters.Count - 1].transform.localPosition = new Vector3 (randomX, 0, 100.0f);
+			monsters[monsters.Count - 1].Initialize(hotel.width);
 
-			spawnDuration = Random.Range (120, 240);
+			spawnDuration = Random.Range (240, 420);
 		}
 
 		if (spawnDuration > 0) {
