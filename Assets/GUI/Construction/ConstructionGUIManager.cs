@@ -52,7 +52,8 @@ public class ConstructionGUIManager : MonoBehaviour {
 				xTemp -= (width-1)*0.5f; int x = Mathf.FloorToInt (xTemp);
 				
 				print ("X: " + x + "Y: " +y);
-				hotel.roomManager.MakeRoom (x, y, hotel.rooms[selected]);
+				if(hotel.gold >= hotel.rooms[selected].cost)
+				   hotel.roomManager.MakeRoom (x, y, hotel.rooms[selected]);
 			} else if (Input.GetMouseButtonDown (1)) {
 				int x = Mathf.FloorToInt (xTemp);
 

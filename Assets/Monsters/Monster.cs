@@ -12,6 +12,7 @@ public class Monster : MonoBehaviour {
 	public int hotelWidth;
 
 	private float speed;
+	private float velY;
 
 	private bool clicked;
 	private string aiState;
@@ -24,6 +25,7 @@ public class Monster : MonoBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 
 		speed = 0.01f;
+		velY = 0.0f;
 		aiState = "IDLE";
 		aiStateDuration = Random.Range (120, 240);
 		sleepNeed = 500;
@@ -37,7 +39,25 @@ public class Monster : MonoBehaviour {
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 			transform.localPosition = new Vector3 (mousePos.x, mousePos.y, 100.0f);
 		} else {
-			updateAI(false);
+			// Check if above ground first
+			float ground = 0.0f;
+			if (room != null) ground = room.transform.localPosition.y;
+
+			if (transform.localPosition.y > ground) {
+				velY -= 0.01f;
+				transform.Translate(new Vector3(0.0f, velY, 0.0f));
+				if (transform.localPosition.y > ground) {
+					spriteRenderer.sprite = sprites [3];
+				} else
+					spriteRenderer.sprite = sprites[0];
+			} else {
+				velY = 0.0f;
+				transform.localPosition = new Vector3(transform.localPosition.x,
+				                                      ground,
+				                                      transform.localPosition.z);
+
+				updateAI(false);
+			}
 		}
 	}
 
@@ -62,7 +82,7 @@ public class Monster : MonoBehaviour {
 				room.updateSprite();
 			}
 			room = null;
-			transform.localPosition = new Vector3 (transform.localPosition.x, 0, 100.0f);
+			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 
 		} else if (cells [cellX, cellY] != null && cells [cellX, cellY].monsters.Count < cells [cellX, cellY].capacity) {
 			if (room != null) {
@@ -73,13 +93,11 @@ public class Monster : MonoBehaviour {
 			room.monsters.Add(this);
 			room.updateSprite();
 
-			int newY = Mathf.FloorToInt (transform.localPosition.y / 2.0f + 0.5f) * 2;
-			transform.localPosition = new Vector3 (transform.localPosition.x, newY, 100.0f);
+			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 
 		} else {
-
-			transform.localPosition = tempPos; print ("INVALID");
-
+			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
+			print ("INVALID");
 		}
 
 		transform.localScale = new Vector3 (1-2*Random.Range(0,2), 1, 1);
