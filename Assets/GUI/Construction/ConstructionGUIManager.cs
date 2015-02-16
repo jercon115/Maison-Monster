@@ -81,13 +81,14 @@ public class ConstructionGUIManager : MonoBehaviour {
 	void updateTargetSprite() {
 		if (roomSelected ()) {
 			int width = hotel.rooms [selected].width;
+			int height = hotel.rooms [selected].height;
 
 			float x = targetX * 2.0f + (width - 1),
 			y = targetY * 2.0f;
 
 			target.transform.localPosition = new Vector3 (x, y, 10.0f);
 
-			if (hotel.roomManager.roomLocationValid (targetX, targetY, width)) {
+			if (hotel.roomManager.roomLocationValid (targetX, targetY, width, height)) {
 					targetRenderer.color = new Color32 (255, 255, 255, 128);
 			} else {
 					targetRenderer.color = new Color32 (255, 0, 0, 128);
