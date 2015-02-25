@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Stairwell : Shaft {
+public class Elevator : Shaft {
 }
