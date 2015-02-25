@@ -113,7 +113,7 @@ public class Monster : MonoBehaviour {
 			spriteRenderer.sprite = sprites[1];
 
 			spriteRenderer.sortingOrder = 1;
-			spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+			spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.75f);
 			return;
 		} else {
 			spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
