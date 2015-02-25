@@ -7,13 +7,14 @@ public class RoomManager : MonoBehaviour {
 	public Hotel hotel;
 	public Room[,] cells;
 
-	public PopupText popupText;
 	private GameObject ConstructionEffect;
+	private PopupText popupText;
 
 	// Use this for initialization
 	public void Start () {
 		cells = new Room[hotel.width, hotel.height];
 		ConstructionEffect = Resources.Load ("Effects/Prefabs/Dust Cloud Particle") as GameObject;
+		popupText = Resources.Load<PopupText>("Effects/Prefabs/Popup Text");
 	}
 
 	public void MakeRoom(int x, int y, Room newroom) {

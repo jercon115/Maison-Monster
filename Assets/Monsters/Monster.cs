@@ -4,7 +4,7 @@ using System.Collections;
 public class Monster : MonoBehaviour {
 
 	public Sprite[] sprites;
-	public PopupText popupText;
+	private PopupText popupText;
 	private SpriteRenderer spriteRenderer;
 
 	public MonsterManager monsterManager;
@@ -23,7 +23,9 @@ public class Monster : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		spriteRenderer = GetComponent<SpriteRenderer>();;
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		popupText = Resources.Load<PopupText>("Effects/Prefabs/Popup Text");
+
 		print ("Test: " + popupText);
 		speed = 0.01f;
 		velY = 0.0f;
