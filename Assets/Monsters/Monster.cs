@@ -4,6 +4,7 @@ using System.Collections;
 public class Monster : MonoBehaviour {
 
 	public Sprite[] sprites;
+	public PopupText popupText;
 	private SpriteRenderer spriteRenderer;
 
 	public MonsterManager monsterManager;
@@ -22,8 +23,8 @@ public class Monster : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		spriteRenderer = GetComponent<SpriteRenderer>();
-		
+		spriteRenderer = GetComponent<SpriteRenderer>();;
+		print ("Test: " + popupText);
 		speed = 0.01f;
 		velY = 0.0f;
 		aiState = "IDLE";
@@ -119,7 +120,12 @@ public class Monster : MonoBehaviour {
 			spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
 			if (sleepNeed > 0) {
 				aiState = "SLEEP";
-				if (sleepNeed % 5 == 0) monsterManager.hotel.gold += room.income;
+				if (sleepNeed % 50 == 0) {
+					monsterManager.hotel.gold += room.income;
+					Vector3 popUpPos = transform.localPosition; popUpPos.z = -5.0f;
+					PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
+					newPopupText.text_display = "+" + room.income; newPopupText.text_color = Color.yellow;
+				}
 				sleepNeed--;
 
 				spriteRenderer.sprite = sprites [2];

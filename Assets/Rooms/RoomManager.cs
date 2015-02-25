@@ -7,6 +7,7 @@ public class RoomManager : MonoBehaviour {
 	public Hotel hotel;
 	public Room[,] cells;
 
+	public PopupText popupText;
 	private GameObject ConstructionEffect;
 
 	// Use this for initialization
@@ -31,12 +32,15 @@ public class RoomManager : MonoBehaviour {
 			for(int i = 0; i < tmpRoom.width; i++) {
 				for(int j = 0; j < tmpRoom.height; j++) {
 					cells[tmpRoom.cellX + i, tmpRoom.cellY + j] = tmpRoom;
-					if (!(tmpRoom is Shaft) || (i == x - tmpRoom.cellX && j == y - tmpRoom.cellY))
+					if (!(tmpRoom is Shaft) || (i == x - tmpRoom.cellX && j == y - tmpRoom.cellY)) {
 						Instantiate(ConstructionEffect, new Vector3((tmpRoom.cellX+i)*2.0f, (tmpRoom.cellY+j)*2.0f, 0.0f), Quaternion.identity);
+					}
 				}
 			}
-
-			hotel.gold -= newroom.cost;
+			Vector3 popUpPos = new Vector3((tmpRoom.cellX)*2.0f + newroom.width*0.5f, (tmpRoom.cellY)*2.0f, 0.0f); popUpPos.z = -5.0f;
+			PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
+			newPopupText.text_display = "-" + newroom.cost; newPopupText.text_color = Color.red;
+				hotel.gold -= newroom.cost;
 		}
 	}
 
