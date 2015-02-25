@@ -11,9 +11,13 @@ public class Shaft : Room {
 	private int spriteCount;
 
 	void Awake() {
+		Setup ();
+	}
+
+	public void Setup() {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		ConstructionEffect = Resources.Load ("Effects/Prefabs/Dust Cloud Particle") as GameObject;
-
+		
 		spriteCount = 0;
 		sprites = new Stack<GameObject>();
 	}
@@ -29,6 +33,9 @@ public class Shaft : Room {
 			height += otherRoom.height;
 			updateSprites ( height - 1);
 
+			foreach(Transform child in otherRoom.transform) {
+				Destroy (child.gameObject);
+			}
 			Destroy (otherRoom.gameObject);
 		}
 	}
@@ -59,6 +66,7 @@ public class Shaft : Room {
 			} else  {
 				tmpRenderer.sprite = midTexture;
 			}
+			tmpObj.name = "ShaftTexture";
 			tmpObj.transform.localPosition = new Vector3(0.0f, spriteCount*2.0f+2.0f, 0.0f);
 			tmpObj.transform.SetParent(transform, false);
 
@@ -93,7 +101,7 @@ public class Shaft : Room {
 					splitRoom.height = y - cellY;
 
 					foreach(Transform child in splitRoom.transform) {
-						Destroy (child.gameObject);
+						if (child.name == "ShaftTexture") Destroy (child.gameObject);
 					}
 
 					(splitRoom as Shaft).updateSprites(splitRoom.height - 1);
