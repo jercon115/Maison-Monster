@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Shaft : Room {
 	public Sprite singleTexture;
@@ -7,115 +7,117 @@ public class Shaft : Room {
 	public Sprite midTexture;
 	public Sprite bottomTexture;
 
-	private bool elvRequested;
-	private RoomManager roomManager;
-	private Hotel hotel;
-	private SpriteRenderer myRenderer;
+	private Stack<GameObject> sprites;
+	private int spriteCount;
 
-	private bool below, above;
-
-	public void Start() {
-		elvRequested = false;
-
-		roomManager = transform.parent.GetComponent<RoomManager>();
-		hotel = roomManager.transform.parent.GetComponent<Hotel>();
-		myRenderer = GetComponent<SpriteRenderer>();
-
-		checkBelowAbove ();
-
-		updateAdjacent (true);
+	void Awake() {
+		Setup ();
 	}
 
-	private void checkBelowAbove() {
-		int x = Mathf.FloorToInt(transform.localPosition.x / 2.0f),
-		y = Mathf.FloorToInt(transform.localPosition.y / 2.0f);
+	public void Setup() {
+		spriteRenderer = GetComponent<SpriteRenderer>();
+		ConstructionEffect = Resources.Load ("Effects/Prefabs/Dust Cloud Particle") as GameObject;
 		
-		below = false; above = false;
-		
-		if (y > 0) {
-			Room room = roomManager.getRoomAt (x, y - 1);
-			if (room is Shaft)
-				if (room.GetType () == GetType ())
-					below = true;
-		}
-
-		if (y < hotel.height-1) {
-			Room room = roomManager.getRoomAt (x, y + 1);
-			if (room is Shaft)
-				if (room.GetType () == GetType ())
-				above = true;
-		}
-
-		updateTexture ();
-	}
-
-	private void updateTexture() {
-		if (below) {
-			if (above) {
-				myRenderer.sprite = midTexture; //Mid
-			} else
-				myRenderer.sprite = topTexture; //Top
-		} else {
-			if (above) {
-				myRenderer.sprite = bottomTexture; //Bottom
-			} else
-				myRenderer.sprite = singleTexture; //Single
-		}
-	}
-
-	public void openAbove() {
-		above = true;
-		updateTexture ();
+		spriteCount = 0;
+		sprites = new Stack<GameObject>();
 	}
 	
-	public void openBelow() {
-		below = true;
-		updateTexture ();
-	}
+	public void checkMerge(Room otherRoom) {
+		if (otherRoom == null) return;
+		if (otherRoom.GetType () == GetType ()) {
+			if (otherRoom.transform.localPosition.y < transform.localPosition.y) {
+				transform.localPosition = otherRoom.transform.localPosition;
 
-	public void closeAbove() {
-		above = false;
-		updateTexture ();
-	}
-
-	public void closeBelow() {
-		below = false;
-		updateTexture ();
-	}
-
-	private void updateAdjacent(bool openClose) { // 1 is open, 0 is close
-		int x = Mathf.FloorToInt(transform.localPosition.x / 2.0f),
-		y = Mathf.FloorToInt(transform.localPosition.y / 2.0f);
-
-		if (y > 0) {
-			Room room = roomManager.getRoomAt (x, y - 1);
-			if (room is Shaft) {
-				if (room.GetType () == GetType ()) {
-					if (openClose) {
-						(room as Shaft).openAbove();
-					} else
-						(room as Shaft).closeAbove();
-				}
+				cellY = otherRoom.cellY;
 			}
-		}
-		
-		if (y < hotel.height-1) {
-			Room room = roomManager.getRoomAt (x, y + 1);
-			if (room is Shaft) {
-				if (room.GetType () == GetType ()) {
-					if (openClose) {
-						(room as Shaft).openBelow();
-					} else
-						(room as Shaft).closeBelow();
-				}
+			height += otherRoom.height;
+			updateSprites ( height - 1);
+
+			foreach(Transform child in otherRoom.transform) {
+				Destroy (child.gameObject);
 			}
+			Destroy (otherRoom.gameObject);
 		}
 	}
 
-	public override void Destroy() {
-		updateAdjacent (false);
-		print (GetType());
+	public void updateSprites(int newCount) {
+		if (newCount < 0) return;
 
-		Destroy (gameObject);
+		if (spriteCount < newCount) {
+			// Remove top
+			if (spriteCount > 0) {
+				Destroy( sprites.Pop() );
+				spriteCount--;
+			}
+		} else {
+			// Remove sprites until and including the new top
+			while(spriteCount >= newCount && spriteCount > 0) {
+				Destroy( sprites.Pop() );
+				spriteCount--;
+			}
+		}
+
+		// Add sprites until the new top
+		while(spriteCount < newCount) {
+			GameObject tmpObj = new GameObject();
+			SpriteRenderer tmpRenderer = tmpObj.AddComponent (typeof(SpriteRenderer)) as SpriteRenderer;
+			if (spriteCount == newCount - 1) {
+				tmpRenderer.sprite = topTexture;
+			} else  {
+				tmpRenderer.sprite = midTexture;
+			}
+			tmpObj.name = "ShaftTexture";
+			tmpObj.transform.localPosition = new Vector3(0.0f, spriteCount*2.0f+2.0f, 0.0f);
+			tmpObj.transform.SetParent(transform, false);
+
+			sprites.Push (tmpObj);
+			spriteCount++;
+		}
+
+		// Update own sprite as either bottom or single sprite
+		if (spriteCount == 0) {
+			spriteRenderer.sprite = singleTexture;
+		} else {
+			spriteRenderer.sprite = bottomTexture;
+		}
+	}
+
+	public Room checkSplit(int y) {
+		if (height == 1) {
+			this.Destroy ();
+			return null;
+		} else {
+			Room splitRoom = null;
+
+			if (y == cellY + height - 1) { // top of shaft?
+				height--;
+			} else {
+				// Was the shaft split?
+				if ( y > cellY ) {
+					splitRoom = Instantiate (this, transform.localPosition, Quaternion.identity) as Room;
+
+					splitRoom.name = name;
+					splitRoom.transform.parent = transform.parent;
+					splitRoom.height = y - cellY;
+
+					foreach(Transform child in splitRoom.transform) {
+						if (child.name == "ShaftTexture") Destroy (child.gameObject);
+					}
+
+					(splitRoom as Shaft).updateSprites(splitRoom.height - 1);
+				}
+
+				// Move above deletion
+				transform.Translate ( new Vector3(0.0f , (y - cellY + 1)*2.0f, 0.0f));
+				height -= (y - cellY + 1); print ("HEIGHT: " + height);
+				cellY = y+1;
+				updateSprites (height - 1);
+
+			}
+
+			updateSprites (height - 1);
+			Instantiate(ConstructionEffect, new Vector3(cellX*2.0f, y*2.0f, 0.0f), Quaternion.identity);
+			return splitRoom;
+		}
 	}
 }
