@@ -2,13 +2,15 @@
 using System.Collections;
 
 public class Monster : MonoBehaviour {
-
-	public Sprite[] sprites;
-	private PopupText popupText;
-	private SpriteRenderer spriteRenderer;
-
 	public MonsterManager monsterManager;
 	public Room room;
+
+	public Sprite[] sprites;
+	public bool prefersAlone;
+	public bool prefersCompany;
+
+	private PopupText popupText;
+	private SpriteRenderer spriteRenderer;
 
 	private int hotelWidth;
 	private float hotelBounds = 8.0f;
@@ -123,10 +125,14 @@ public class Monster : MonoBehaviour {
 			if (sleepNeed > 0) {
 				aiState = "SLEEP";
 				if (sleepNeed % 50 == 0) {
-					monsterManager.hotel.gold += room.income;
+					int revenue = room.income;
+					if (prefersAlone && room.monsters.Count > 1) revenue /= 5;
+					if (prefersCompany && room.monsters.Count < 2) revenue /= 5;
+					monsterManager.hotel.gold += revenue;
+
 					Vector3 popUpPos = transform.localPosition; popUpPos.z = -5.0f;
 					PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
-					newPopupText.text_display = "+" + room.income; newPopupText.text_color = Color.yellow;
+					newPopupText.text_display = "+" + revenue; newPopupText.text_color = Color.yellow;
 				}
 				sleepNeed--;
 

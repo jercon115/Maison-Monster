@@ -38,7 +38,7 @@ public class RoomManager : MonoBehaviour {
 					}
 				}
 			}
-			Vector3 popUpPos = new Vector3((tmpRoom.cellX)*2.0f + newroom.width*0.5f, (tmpRoom.cellY)*2.0f, 0.0f); popUpPos.z = -5.0f;
+			Vector3 popUpPos = new Vector3((tmpRoom.cellX)*2.0f + (newroom.width-1)*1.0f, (tmpRoom.cellY)*2.0f, 0.0f); popUpPos.z = -5.0f;
 			PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
 			newPopupText.text_display = "-" + newroom.cost; newPopupText.text_color = Color.red;
 				hotel.gold -= newroom.cost;
