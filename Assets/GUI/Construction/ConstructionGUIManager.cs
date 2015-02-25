@@ -37,35 +37,36 @@ public class ConstructionGUIManager : MonoBehaviour {
 		Vector3 canvasPos = mousePos - Camera.main.transform.localPosition;
 
 		setTargetPosition (mousePos);
-		if (canvasPos.x <= -4.0) {
-			if (Input.GetMouseButtonDown (0)) {
-				int newSelection = Mathf.FloorToInt ((5.0f-canvasPos.y)/2.0f);
-				updateSelected (newSelection);
-				print (newSelection);
-			}
-		} else {
-			float xTemp = mousePos.x/2.0f + 0.5f;
-			int y = Mathf.FloorToInt (mousePos.y/2.0f + 0.5f);
+		float xTemp = mousePos.x/2.0f + 0.5f;
+		int y = Mathf.FloorToInt (mousePos.y/2.0f + 0.5f);
 
-			if (Input.GetMouseButtonDown (0) && roomSelected ()) {
-				int width = hotel.rooms[selected].width;
-				xTemp -= (width-1)*0.5f; int x = Mathf.FloorToInt (xTemp);
-				
-				print ("X: " + x + "Y: " +y);
-				if(hotel.gold >= hotel.rooms[selected].cost)
-				   hotel.roomManager.MakeRoom (x, y, hotel.rooms[selected]);
-			} else if (Input.GetMouseButtonDown (1)) {
-				int x = Mathf.FloorToInt (xTemp);
+		if (Input.GetMouseButtonDown (0) && roomSelected ()) {
+			int width = hotel.rooms[selected].width;
+			xTemp -= (width-1)*0.5f; int x = Mathf.FloorToInt (xTemp);
+			
+			print ("X: " + x + "Y: " +y);
+			if(hotel.gold >= hotel.rooms[selected].cost)
+			   hotel.roomManager.MakeRoom (x, y, hotel.rooms[selected]);
+		} else if (Input.GetMouseButtonDown (1)) {
+			int x = Mathf.FloorToInt (xTemp);
 
-				if (selected == -1) {
-					hotel.roomManager.DeleteRoom (x, y);
-					updateTargetSprite();
-				} else {
-					selected = -1;
-					targetRenderer.sprite = null;
-				}
+			if (selected == -1) {
+				hotel.roomManager.DeleteRoom (x, y);
+				updateTargetSprite();
+			} else {
+				selected = -1;
+				targetRenderer.sprite = null;
 			}
 		}
+	}
+
+	public void updateSelected(int newSelection) {
+		selected = newSelection;
+		if (roomSelected()) {
+			targetRenderer.sprite = roomSprites[selected];
+			print ("changed: " + selected);
+		} else
+			targetRenderer.sprite = null;
 	}
 
 	void setTargetPosition(Vector3 mousePos) {
@@ -103,29 +104,9 @@ public class ConstructionGUIManager : MonoBehaviour {
 
 	void updateRoomSprites() {
 		roomSprites = new Sprite[roomCount];
-		palette = new GameObject[roomCount];
 		for(int i = 0; i < roomCount; i++) {
 			roomSprites[i] = hotel.rooms[i].GetComponent<SpriteRenderer>().sprite;
-
-			palette[i] = Instantiate (Resources.Load ("EmptySprite")) as GameObject;
-
-			palette[i].transform.Translate(-6.0f , 4.0f - (2.0f * i) , 0.0f);
-			palette[i].transform.localScale = new Vector3(0.75f, 0.75f);
-			palette[i].transform.parent = canvas.transform;
-
-			SpriteRenderer renderer = palette[i].GetComponent<SpriteRenderer>();
-			renderer.sprite = roomSprites[i];
-			renderer.sortingLayerName = "UI";
 		}
-	}
-
-	void updateSelected(int newSelection) {
-		selected = newSelection;
-		if (roomSelected()) {
-			targetRenderer.sprite = roomSprites[selected];
-			print ("changed: " + selected);
-		} else
-			targetRenderer.sprite = null;
 	}
 
 	bool roomSelected() {

@@ -18,6 +18,6 @@ public class Hotel : MonoBehaviour {
 	}
 
 	void Update() {
-		goldText.text = "GOLD: " + gold +"G";
+		goldText.text = gold.ToString();
 	}
 }
