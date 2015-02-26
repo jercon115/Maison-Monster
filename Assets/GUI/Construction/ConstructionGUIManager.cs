@@ -40,22 +40,40 @@ public class ConstructionGUIManager : MonoBehaviour {
 		float xTemp = mousePos.x/2.0f + 0.5f;
 		int y = Mathf.FloorToInt (mousePos.y/2.0f + 0.5f);
 
-		if (Input.GetMouseButtonDown (0) && roomSelected ()) {
-			int width = hotel.rooms[selected].width;
-			xTemp -= (width-1)*0.5f; int x = Mathf.FloorToInt (xTemp);
-			
-			print ("X: " + x + "Y: " +y);
-			if(hotel.gold >= hotel.rooms[selected].cost)
-			   hotel.roomManager.MakeRoom (x, y, hotel.rooms[selected]);
-		} else if (Input.GetMouseButtonDown (1)) {
-			int x = Mathf.FloorToInt (xTemp);
+		if (roomSelected ()) {
+			if (Input.GetMouseButtonDown (0)) {
+					hotel.roomManager.unhighlightPrevRoom ();
 
-			if (selected == -1) {
+					int width = hotel.rooms [selected].width;
+					xTemp -= (width - 1) * 0.5f;
+					int x = Mathf.FloorToInt (xTemp);
+
+					if (hotel.gold >= hotel.rooms [selected].cost)
+							hotel.roomManager.MakeRoom (x, y, hotel.rooms [selected]);
+			} else if (Input.GetMouseButtonDown (1)) {
+					selected = -1;
+					targetRenderer.sprite = null;
+			}
+		} else if (selected == -1) {
+			if (Input.GetMouseButtonDown (1)) {
+				int x = Mathf.FloorToInt (xTemp);
+
 				hotel.roomManager.DeleteRoom (x, y);
 				updateTargetSprite();
-			} else {
+			}
+		} else if (selected == -2) {
+			int x = Mathf.FloorToInt (xTemp);
+			if (hotel.roomManager.roomExistsAt(x, y)) {
+				hotel.roomManager.highlightRoomAt (x, y);
+			} else
+				hotel.roomManager.unhighlightPrevRoom();
+			
+			if (Input.GetMouseButtonDown (0)) {
+				hotel.roomManager.DeleteRoom (x, y);
+				updateTargetSprite();
+			} else if (Input.GetMouseButtonDown (1)) {
 				selected = -1;
-				targetRenderer.sprite = null;
+				hotel.roomManager.unhighlightPrevRoom();
 			}
 		}
 	}
@@ -64,7 +82,17 @@ public class ConstructionGUIManager : MonoBehaviour {
 		selected = newSelection;
 		if (roomSelected()) {
 			targetRenderer.sprite = roomSprites[selected];
-			print ("changed: " + selected);
+		} else
+			targetRenderer.sprite = null;
+	}
+
+	public void toggleSelected(int newSelection) {
+		if  (roomSelected () && selected == newSelection) {
+			selected = -1;
+		} else
+			selected = newSelection;
+		if (roomSelected()) {
+			targetRenderer.sprite = roomSprites[selected];
 		} else
 			targetRenderer.sprite = null;
 	}

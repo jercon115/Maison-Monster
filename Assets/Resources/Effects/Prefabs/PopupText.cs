@@ -12,7 +12,6 @@ public class PopupText : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		print ("POPUP" + text_display);
 		textMesh = GetComponent<TextMesh>();
 		textMesh.text = text_display;
 	}

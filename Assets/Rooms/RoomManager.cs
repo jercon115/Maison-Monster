@@ -98,7 +98,37 @@ public class RoomManager : MonoBehaviour {
 		return true;
 	}
 
+	private Room previousHighlightedRoom = null;
+
+	public void highlightRoomAt(int x, int y) {
+		Room targetRoom = cells[x, y];
+		if (targetRoom != null) {
+			if (targetRoom != previousHighlightedRoom) {
+				if (previousHighlightedRoom != null)
+					unhighlightPrevRoom ();
+				targetRoom.highlightSprite (new Color32 (255, 0, 0, 255), true);
+				previousHighlightedRoom = targetRoom;
+			}
+		} else {
+			unhighlightPrevRoom();
+		}
+	}
+
+	public void unhighlightPrevRoom() {
+		if (previousHighlightedRoom != null) {
+			previousHighlightedRoom.highlightSprite(new Color (1f, 1f, 1f, 1f), false);
+			previousHighlightedRoom = null;
+		}
+	}
+
 	public Room getRoomAt(int x, int y) {
 		return cells[x, y];
+	}
+
+	public bool roomExistsAt(int x, int y) {
+		if (x < 0 || x > cells.GetLength (0) - 1 ||
+		    y < 0 || y > cells.GetLength (1) - 1)
+			return false;
+		return true;
 	}
 }

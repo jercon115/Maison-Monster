@@ -10,6 +10,8 @@ public class Room : MonoBehaviour {
 	public int capacity;
 	public List<Monster> monsters;
 
+	private bool highlighted;
+
 	protected SpriteRenderer spriteRenderer;
 	protected GameObject ConstructionEffect;
 	protected RoomManager roomMgr;
@@ -21,13 +23,27 @@ public class Room : MonoBehaviour {
 			spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
 
 		ConstructionEffect = Resources.Load ("Effects/Prefabs/Dust Cloud Particle") as GameObject;
+
+		highlighted = false;
 	}
 
 	public void updateSprite() {
-		if (monsters.Count > 0) {
-			spriteRenderer.color = new Color (1f, 1f, 1f, 1f);
+		if (!highlighted) {
+			if (capacity == 0 || monsters.Count > 0) {
+				spriteRenderer.color = new Color (1f, 1f, 1f, 1f);
+			} else {
+				spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
+			}
+		}
+	}
+
+	public void highlightSprite(Color color, bool turnOnHighlight) {
+		if (turnOnHighlight == false) {
+			highlighted = false;
+			updateSprite ();
 		} else {
-			spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
+			highlighted = true;
+			spriteRenderer.color = color;
 		}
 	}
 
