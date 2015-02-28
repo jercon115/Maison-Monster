@@ -5,9 +5,10 @@ public class Monster : MonoBehaviour {
 	public MonsterManager monsterManager;
 	public Room room;
 
-	public Sprite[] sprites;
 	public bool prefersAlone;
 	public bool prefersCompany;
+
+	private Animator animator;
 
 	private PopupText popupText;
 	private SpriteRenderer spriteRenderer;
@@ -26,11 +27,12 @@ public class Monster : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		popupText = Resources.Load<PopupText>("Effects/Prefabs/Popup Text");
+		animator = GetComponent<Animator>();
+		animator.Play("idle", -1, float.NegativeInfinity);
 
-		print ("Test: " + popupText);
-		speed = 0.01f;
-		velY = 0.0f;
+		popupText = Resources.Load<PopupText>("Effects/Prefabs/Popup Text");
+		
+		speed = 0.01f; velY = 0.0f;
 		aiState = "IDLE";
 		aiStateDuration = Random.Range (120, 240);
 		sleepNeed = 500;
@@ -43,31 +45,31 @@ public class Monster : MonoBehaviour {
 			randomX = 2.0f * hotelWidth + hotelBounds - 1.5f;
 			transform.localScale = new Vector3 (-transform.localScale.x, 1, 1);
 		}
-		transform.localPosition = new Vector3 (randomX, 0, 100.0f);
+		transform.localPosition = new Vector3 (randomX, -1, 100.0f);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (clicked) {
-			spriteRenderer.sprite = sprites [3];
+			animator.Play("pickup", -1, float.NegativeInfinity);
 			Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-			transform.localPosition = new Vector3 (mousePos.x, mousePos.y, 100.0f);
+			transform.localPosition = new Vector3 (mousePos.x, mousePos.y - 1, 100.0f);
 		} else {
 			// Check if above ground first
 			float ground = 0.0f;
 			if (room != null) ground = room.transform.localPosition.y;
 
-			if (transform.localPosition.y > ground) {
+			if (transform.localPosition.y + 1 > ground) {
 				velY -= 0.01f;
 				transform.Translate(new Vector3(0.0f, velY, 0.0f));
-				if (transform.localPosition.y > ground) {
-					spriteRenderer.sprite = sprites [3];
+				if (transform.localPosition.y + 1 > ground) {
+					animator.Play("pickup", -1, float.NegativeInfinity);
 				} else
-					spriteRenderer.sprite = sprites[0];
+					animator.Play("idle", -1, float.NegativeInfinity);
 			} else {
 				velY = 0.0f;
 				transform.localPosition = new Vector3(transform.localPosition.x,
-				                                      ground,
+				                                      ground - 1,
 				                                      transform.localPosition.z);
 
 				updateAI(false);
@@ -89,7 +91,7 @@ public class Monster : MonoBehaviour {
 
 	// Let go of a monster
 	void OnMouseUp() {
-		spriteRenderer.sprite = sprites[0];
+		animator.Play("idle", -1, float.NegativeInfinity);
 		clicked = false;
 
 		int cellX = Mathf.FloorToInt (transform.localPosition.x/2.0f + 0.5f),
@@ -115,7 +117,7 @@ public class Monster : MonoBehaviour {
 		if (room == null) {
 			transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
 			boundsCheck ();
-			spriteRenderer.sprite = sprites[1];
+			animator.Play("walk", -1, float.NegativeInfinity);
 
 			spriteRenderer.sortingOrder = 1;
 			spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.75f);
@@ -130,13 +132,13 @@ public class Monster : MonoBehaviour {
 					if (prefersCompany && room.monsters.Count < 2) revenue /= 5;
 					monsterManager.hotel.gold += revenue;
 
-					Vector3 popUpPos = transform.localPosition; popUpPos.z = -5.0f;
+					Vector3 popUpPos = transform.localPosition; popUpPos.y += 1.0f; popUpPos.z = -5.0f;
 					PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
 					newPopupText.text_display = "+" + revenue; newPopupText.text_color = Color.yellow;
 				}
 				sleepNeed--;
 
-				spriteRenderer.sprite = sprites [2];
+				animator.Play("sleep", -1, float.NegativeInfinity);
 				spriteRenderer.sortingOrder = 0;
 				aiStateDuration = 0;
 
@@ -157,12 +159,12 @@ public class Monster : MonoBehaviour {
 				
 				transform.localScale = new Vector3 (1-2*Random.Range(0,2), 1, 1);
 				
-				spriteRenderer.sprite = sprites[1];
+				animator.Play("walk", -1, float.NegativeInfinity);
 			} else if (aiState != "IDLE") {
 				aiState = "IDLE";
 				aiStateDuration = Random.Range (120, 240);
 				
-				spriteRenderer.sprite = sprites [0];
+				animator.Play("idle", -1, float.NegativeInfinity);;
 			}
 		} else {
 			aiStateDuration -= 1;

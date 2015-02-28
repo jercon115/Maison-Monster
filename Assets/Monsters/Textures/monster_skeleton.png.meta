@@ -1,14 +1,28 @@
 fileFormatVersion: 2
-guid: 8efaabb6ea39269419d373c43702a244
+guid: 3ac334caf3f0b97419af2d6ffae1c609
 TextureImporter:
   fileIDToRecycleName:
-    21300000: monster_slime_idle0
-    21300002: monster_slime_walk0
-    21300004: monster_slime_walk1
-    21300006: monster_slime_walk2
-    21300008: monster_slime_walk3
-    21300010: monster_slime_sleep0
-    21300012: monster_slime_pickup0
+    21300000: monster_skeleton_idle0
+    21300002: monster_skeleton_walk0
+    21300004: monster_skeleton_walk1
+    21300006: monster_skeleton_walk2
+    21300008: monster_skeleton_walk3
+    21300010: monster_skeleton_sleep0
+    21300012: monster_skeleton_pickup0
+    21300014: monster_skeleton_0
+    21300016: monster_skeleton_1
+    21300018: monster_skeleton_2
+    21300020: monster_skeleton_3
+    21300022: monster_skeleton_4
+    21300024: monster_skeleton_5
+    21300026: monster_skeleton_6
+    21300028: mon_skeleton_idle0
+    21300030: mon_skeleton_walk0
+    21300032: mon_skeleton_walk1
+    21300034: mon_skeleton_walk2
+    21300036: mon_skeleton_walk3
+    21300038: mon_skeleton_sleep0
+    21300040: mon_skeleton_pickup0
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -50,73 +64,73 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: monster_slime_idle0
+    - name: mon_skeleton_idle0
       rect:
         serializedVersion: 2
-        x: 1
+        x: 4
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk0
+    - name: mon_skeleton_walk0
       rect:
         serializedVersion: 2
-        x: 49
+        x: 52
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk1
+    - name: mon_skeleton_walk1
       rect:
         serializedVersion: 2
-        x: 97
+        x: 100
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk2
+    - name: mon_skeleton_walk2
       rect:
         serializedVersion: 2
-        x: 145
+        x: 148
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk3
+    - name: mon_skeleton_walk3
       rect:
         serializedVersion: 2
-        x: 193
+        x: 196
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_sleep0
+    - name: mon_skeleton_sleep0
       rect:
         serializedVersion: 2
-        x: 241
+        x: 244
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_pickup0
+    - name: mon_skeleton_pickup0
       rect:
         serializedVersion: 2
-        x: 289
+        x: 292
         y: 1
-        width: 46
-        height: 46
+        width: 40
+        height: 47
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
