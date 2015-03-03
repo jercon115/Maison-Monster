@@ -5,9 +5,28 @@ public class GameCamera : MonoBehaviour {
 
 	public GameObject horizon;
 	public int maxOrthoSize, minOrthoSize;
+
+	public AudioClip[] musicTracks;
+	private AudioSource music;
+	private int prevTrack;
+
 	bool minusDown = false, equalsDown = false;
 
+	void Start () {
+		music = GetComponent<AudioSource> ();
+		prevTrack = Mathf.FloorToInt (Random.Range (0, musicTracks.Length + 1));
+		music.clip = musicTracks[prevTrack];
+		music.Play ();
+	}
+
 	void Update () {
+		// Camera music
+		if (!music.isPlaying) {
+			prevTrack = ( prevTrack + Mathf.FloorToInt(Random.Range(1,musicTracks.Length-1)) ) % musicTracks.Length;
+			music.clip = musicTracks[prevTrack];
+			music.Play ();
+		}
+
 		// Camera movement
 		int vert = 0, horiz = 0;
 		if (Input.GetKey (KeyCode.W) || Input.GetKey (KeyCode.UpArrow))

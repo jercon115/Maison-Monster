@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: c92c359a670d17e41a08f768c9851a31
+guid: e40071c02d5d03f4da9c17a14e9b9443
 TextureImporter:
   fileIDToRecycleName:
-    21300000: UI_gold
-    21300002: UI_build
-    21300004: UI_demolish
-    21300006: UI_close
+    21300000: gold_coin
+    21300002: button_build
+    21300004: button_demolish
+    21300006: button_cancel
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     linearTexture: 0
     correctGamma: 0
     fadeOut: 0
@@ -47,43 +47,43 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: UI_gold
+    - name: gold_coin
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 30
-        height: 22
+        y: 8
+        width: 31
+        height: 24
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: UI_build
+    - name: button_build
       rect:
         serializedVersion: 2
-        x: 34
+        x: 33
         y: 0
-        width: 19
-        height: 22
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: UI_demolish
+    - name: button_demolish
       rect:
         serializedVersion: 2
-        x: 56
+        x: 67
         y: 0
-        width: 22
-        height: 22
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: UI_close
+    - name: button_cancel
       rect:
         serializedVersion: 2
-        x: 79
-        y: 3
-        width: 16
-        height: 16
+        x: 101
+        y: 7
+        width: 20
+        height: 20
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}
