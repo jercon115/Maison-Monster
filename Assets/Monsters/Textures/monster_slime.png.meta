@@ -2,13 +2,19 @@ fileFormatVersion: 2
 guid: 8efaabb6ea39269419d373c43702a244
 TextureImporter:
   fileIDToRecycleName:
-    21300000: monster_slime_idle0
-    21300002: monster_slime_walk0
-    21300004: monster_slime_walk1
-    21300006: monster_slime_walk2
-    21300008: monster_slime_walk3
-    21300010: monster_slime_sleep0
-    21300012: monster_slime_pickup0
+    21300000: mon_slime_idle0
+    21300002: mon_slime_walk0
+    21300004: mon_slime_walk1
+    21300006: mon_slime_walk2
+    21300008: mon_slime_walk3
+    21300010: mon_slime_sleep0
+    21300012: mon_slime_pickup0
+    21300014: mon_slime_eat0
+    21300016: mon_slime_eat1
+    21300018: mon_slime_fun0
+    21300020: mon_slime_fun1
+    21300022: mon_slime_fun2
+    21300024: mon_slime_fun3
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -50,7 +56,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: monster_slime_idle0
+    - name: mon_slime_idle0
       rect:
         serializedVersion: 2
         x: 1
@@ -60,7 +66,7 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk0
+    - name: mon_slime_walk0
       rect:
         serializedVersion: 2
         x: 49
@@ -70,7 +76,7 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk1
+    - name: mon_slime_walk1
       rect:
         serializedVersion: 2
         x: 97
@@ -80,7 +86,7 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk2
+    - name: mon_slime_walk2
       rect:
         serializedVersion: 2
         x: 145
@@ -90,7 +96,7 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_walk3
+    - name: mon_slime_walk3
       rect:
         serializedVersion: 2
         x: 193
@@ -100,7 +106,7 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_sleep0
+    - name: mon_slime_sleep0
       rect:
         serializedVersion: 2
         x: 241
@@ -110,10 +116,70 @@ TextureImporter:
       alignment: 7
       pivot: {x: .5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: monster_slime_pickup0
+    - name: mon_slime_pickup0
       rect:
         serializedVersion: 2
         x: 289
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_eat0
+      rect:
+        serializedVersion: 2
+        x: 337
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_eat1
+      rect:
+        serializedVersion: 2
+        x: 385
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_fun0
+      rect:
+        serializedVersion: 2
+        x: 433
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_fun1
+      rect:
+        serializedVersion: 2
+        x: 481
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_fun2
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 1
+        width: 46
+        height: 46
+      alignment: 7
+      pivot: {x: .5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: mon_slime_fun3
+      rect:
+        serializedVersion: 2
+        x: 577
         y: 1
         width: 46
         height: 46

@@ -11,10 +11,12 @@ public class MonsterManager : MonoBehaviour {
 	private List<Monster> monsters;
 
 	private int spawnDuration;
+	private int totalMonstersSpawned;
 
 	// Use this for initialization
 	void Start () {
 		spawnDuration = 0;
+		totalMonstersSpawned = 0;
 		monsters = new List<Monster> ();
 	}
 
@@ -25,7 +27,14 @@ public class MonsterManager : MonoBehaviour {
 			monsters [monsters.Count - 1].monsterManager = this;
 			monsters[monsters.Count - 1].Initialize(hotel.width);
 
-			spawnDuration = Random.Range (240, 420);
+			int numStars = hotel.getNumStars();
+			spawnDuration = Random.Range (240 - 20*numStars, 420 - 40*numStars);
+
+			totalMonstersSpawned += 1;
+			if (totalMonstersSpawned == 10) {
+				hotel.addStar (1);
+				totalMonstersSpawned = 0;
+			}
 		}
 
 		if (spawnDuration > 0) {

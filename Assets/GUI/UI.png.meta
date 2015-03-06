@@ -6,10 +6,18 @@ TextureImporter:
     21300002: button_build
     21300004: button_demolish
     21300006: button_cancel
+    21300008: hp_face_happy
+    21300010: hp_face_content
+    21300012: hp_face_neutral
+    21300014: hp_face_upset
+    21300016: hp_face_mad
+    21300018: hp_bar
+    21300020: star_empty
+    21300022: star_full
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
+    enableMipMap: 1
     linearTexture: 0
     correctGamma: 0
     fadeOut: 0
@@ -80,10 +88,90 @@ TextureImporter:
     - name: button_cancel
       rect:
         serializedVersion: 2
-        x: 101
-        y: 7
+        x: 100
+        y: 12
         width: 20
         height: 20
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_face_happy
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 9
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_face_content
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 9
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_face_neutral
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 9
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_face_upset
+      rect:
+        serializedVersion: 2
+        x: 193
+        y: 9
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_face_mad
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 9
+        width: 23
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: hp_bar
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 13
+        width: 1
+        height: 15
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: star_empty
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 11
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: star_full
+      rect:
+        serializedVersion: 2
+        x: 267
+        y: 11
+        width: 21
+        height: 21
       alignment: 0
       pivot: {x: .5, y: .5}
       border: {x: 0, y: 0, z: 0, w: 0}

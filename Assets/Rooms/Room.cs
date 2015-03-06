@@ -8,6 +8,7 @@ public class Room : MonoBehaviour {
 	public int cost;
 	public int income;
 	public int capacity;
+	public string room_type;
 	public List<Monster> monsters;
 
 	private bool highlighted;
