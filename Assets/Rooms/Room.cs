@@ -19,6 +19,13 @@ public class Room : MonoBehaviour {
 	protected RoomManager roomMgr;
 	protected Hotel hotel;
 
+	protected void popupCostText(float x, float y) {
+		Vector3 popUpPos = new Vector3(x, y, -5.0f);
+		PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
+		newPopupText.text_display = "-" + cost; newPopupText.text_color = Color.red;
+		hotel.gold -= cost;
+	}
+
 	// Initialization of variables and position
 	public virtual void Setup(RoomManager myRoomMgr, int x, int y) {
 		// Setup variables
@@ -55,12 +62,15 @@ public class Room : MonoBehaviour {
 		// Popup text for cost
 		popupCostText (cellX * 2.0f + (width - 1) * 1.0f, cellY * 2.0f);
 	}
-
-	protected void popupCostText(float x, float y) {
-		Vector3 popUpPos = new Vector3(x, y, -5.0f);
-		PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
-		newPopupText.text_display = "-" + cost; newPopupText.text_color = Color.red;
-		hotel.gold -= cost;
+	
+	public virtual void demolishCell(int x, int y) {
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				Instantiate(ConstructionEffect, new Vector3((cellX+i)*2.0f, (cellY+j)*2.0f, 0.0f), Quaternion.identity);
+				roomMgr.cells[cellX + i, cellY +j] = null;
+			}
+		}
+		Destroy (gameObject);
 	}
 
 	public void updateSprite() {
@@ -73,7 +83,7 @@ public class Room : MonoBehaviour {
 		}
 	}
 
-	public void highlightSprite(Color color, bool turnOnHighlight) {
+	public virtual void highlightSprite(Color color, bool turnOnHighlight) {
 		if (turnOnHighlight == false) {
 			highlighted = false;
 			updateSprite ();
@@ -81,15 +91,5 @@ public class Room : MonoBehaviour {
 			highlighted = true;
 			spriteRenderer.color = color;
 		}
-	}
-
-	public virtual void demolishCell(int x, int y) {
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				Instantiate(ConstructionEffect, new Vector3((cellX+i)*2.0f, (cellY+j)*2.0f, 0.0f), Quaternion.identity);
-				roomMgr.cells[cellX + i, cellY +j] = null;
-			}
-		}
-		Destroy (gameObject);
 	}
 }

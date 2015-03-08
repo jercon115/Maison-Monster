@@ -55,6 +55,45 @@ public class Shaft : Room {
 				roomMgr.cells[cellX + i, cellY + j] = this;
 	}
 
+	// Demolishing a cell
+	public override void demolishCell(int x, int y) {
+		// Update cell at x and y of deletion
+		roomMgr.cells [x, y] = null;
+		Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f), Quaternion.identity);
+		
+		if (height == 1) {
+			Destroy (gameObject);
+		} else {
+			Shaft splitRoom = null;
+			
+			if (y == cellY + height - 1) { // top of shaft?
+				height--;
+			} else {
+				// Was the shaft split?
+				if ( y > cellY ) {
+					splitRoom = Instantiate (this) as Shaft;
+					splitRoom.Setup (roomMgr, cellX, cellY);
+					
+					// Update room's name, height, and room manager's room cells
+					splitRoom.name = name;
+					splitRoom.height = y - cellY;
+					for(int i = 0; i < splitRoom.height; i++)
+						roomMgr.cells[cellX, cellY +i] = splitRoom;
+					
+					// Update sprites for splitRoom
+					splitRoom.updateSprites(splitRoom.height - 1);
+				}
+				
+				// Move above deletion
+				transform.Translate ( new Vector3(0.0f , (y - cellY + 1)*2.0f, 0.0f));
+				height -= (y - cellY + 1); print ("HEIGHT: " + height);
+				cellY = y+1;
+			}
+			
+			updateSprites (height - 1);
+		}
+	}
+
 	public void checkMerge(Room otherRoom) {
 		if (otherRoom == null) return;
 		if (otherRoom.GetType () == GetType ()) {
@@ -115,41 +154,13 @@ public class Shaft : Room {
 		}
 	}
 
-	public override void demolishCell(int x, int y) {
-		// Update cell at x and y of deletion
-		roomMgr.cells [x, y] = null;
-		Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f), Quaternion.identity);
-
-		if (height == 1) {
-			Destroy (gameObject);
+	public override void highlightSprite(Color color, bool turnOnHighlight) {
+		if (turnOnHighlight == false) {
+			highlighted = false;
+			updateSprite ();
 		} else {
-			Shaft splitRoom = null;
-
-			if (y == cellY + height - 1) { // top of shaft?
-				height--;
-			} else {
-				// Was the shaft split?
-				if ( y > cellY ) {
-					splitRoom = Instantiate (this) as Shaft;
-					splitRoom.Setup (roomMgr, cellX, cellY);
-
-					// Update room's name, height, and room manager's room cells
-					splitRoom.name = name;
-					splitRoom.height = y - cellY;
-					for(int i = 0; i < splitRoom.height; i++)
-						roomMgr.cells[cellX, cellY +i] = splitRoom;
-
-					// Update sprites for splitRoom
-					splitRoom.updateSprites(splitRoom.height - 1);
-				}
-
-				// Move above deletion
-				transform.Translate ( new Vector3(0.0f , (y - cellY + 1)*2.0f, 0.0f));
-				height -= (y - cellY + 1); print ("HEIGHT: " + height);
-				cellY = y+1;
-			}
-
-			updateSprites (height - 1);
+			highlighted = true;
+			spriteRenderer.color = color;
 		}
 	}
 }
