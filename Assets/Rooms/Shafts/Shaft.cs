@@ -153,14 +153,4 @@ public class Shaft : Room {
 			spriteRenderer.sprite = bottomTexture;
 		}
 	}
-
-	public override void highlightSprite(Color color, bool turnOnHighlight) {
-		if (turnOnHighlight == false) {
-			highlighted = false;
-			updateSprite ();
-		} else {
-			highlighted = true;
-			spriteRenderer.color = color;
-		}
-	}
 }
