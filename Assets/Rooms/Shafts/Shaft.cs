@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class Shaft : Room {
@@ -9,6 +10,14 @@ public class Shaft : Room {
 
 	private Stack<GameObject> sprites;
 	private int spriteCount;
+
+	// for use with pathfinding
+	private List<Shaft> connectedShafts;
+	
+	public int[] leftmostCells;
+	public int[] rightmostCells;
+
+	private int distFromStart;
 
 	// Initializing variables and position, called when constructing this room and cloning a shaft during a split
 	public override void Setup(RoomManager myRoomMgr, int x, int y) {
@@ -23,6 +32,14 @@ public class Shaft : Room {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteCount = 0;
 		sprites = new Stack<GameObject>();
+		connectedShafts = new List<Shaft> ();
+
+		// Initialize values for array for leftmost cells and rightmost cells at each floor
+		leftmostCells = new int[height];
+		rightmostCells = new int[height];
+		for (int i = 0; i < height; i++) {
+			leftmostCells[i] = cellX; rightmostCells[i] = cellX;
+		}
 
 		// Delete sprites that carried over from cloning
 		foreach(Transform child in transform) {
@@ -33,6 +50,18 @@ public class Shaft : Room {
 		transform.parent = roomMgr.transform;
 		transform.localPosition =
 			new Vector3 (x * 2.0f, y * 2.0f, 10.0f);
+
+		// Check if it can be merged with another shaft
+		if (cellY > 0) checkMerge (roomMgr.cells [cellX, cellY - 1]); // below
+		if (cellY < hotel.height-height) checkMerge(roomMgr.cells [cellX, cellY+height]); // above
+		
+		// Update room cells
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < height; j++)
+				roomMgr.cells[cellX + i, cellY + j] = this;
+
+		// Update reachable ranges for any shafts in floors intersecting room (will include this shaft)
+		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
 	}
 
 	// Called when constructing this room
@@ -44,25 +73,21 @@ public class Shaft : Room {
 		
 		// Popup text for cost
 		popupCostText (x*2.0f, y*2.0f);
-
-		// Check if it can be merged with another shaft
-		if (cellY > 0) checkMerge (roomMgr.cells [cellX, cellY - 1]); // below
-		if (cellY < hotel.height-height) checkMerge(roomMgr.cells [cellX, cellY+height]); // above
-		
-		// Update room cells
-		for(int i = 0; i < width; i++)
-			for(int j = 0; j < height; j++)
-				roomMgr.cells[cellX + i, cellY + j] = this;
 	}
 
 	// Demolishing a cell
-	public override void demolishCell(int x, int y) {
+	public override void DemolishCell(int x, int y) {
+		// Dust cloud effect
+		Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f), Quaternion.identity);
+
 		// Update cell at x and y of deletion
 		roomMgr.cells [x, y] = null;
-		Instantiate(ConstructionEffect, new Vector3(x*2.0f, y*2.0f, 0.0f), Quaternion.identity);
-		
+
+		// Update reachable ranges for any shafts in floors intersecting room
+		roomMgr.updateShaftsReachableRanges (y, y);
+
 		if (height == 1) {
-			Destroy (gameObject);
+			this.DestroyRoom ();
 		} else {
 			Shaft splitRoom = null;
 			
@@ -72,21 +97,27 @@ public class Shaft : Room {
 				// Was the shaft split?
 				if ( y > cellY ) {
 					splitRoom = Instantiate (this) as Shaft;
-					splitRoom.Setup (roomMgr, cellX, cellY);
-					
-					// Update room's name, height, and room manager's room cells
+
+					// Update room's name, height, and room manager's room cells, then setup
 					splitRoom.name = name;
 					splitRoom.height = y - cellY;
-					for(int i = 0; i < splitRoom.height; i++)
-						roomMgr.cells[cellX, cellY +i] = splitRoom;
+					splitRoom.Setup (roomMgr, cellX, cellY);
 					
 					// Update sprites for splitRoom
 					splitRoom.updateSprites(splitRoom.height - 1);
 				}
-				
+
+				int newHeight = height - (y - cellY + 1);
+
+				// Update leftmostCells and rightmostCells
+				Array.Copy (leftmostCells, y-cellY+1, leftmostCells, 0, newHeight);
+				Array.Resize(ref leftmostCells, newHeight);
+				Array.Copy (rightmostCells, y-cellY+1, rightmostCells, 0, newHeight);
+				Array.Resize(ref rightmostCells, newHeight);
+
 				// Move above deletion
 				transform.Translate ( new Vector3(0.0f , (y - cellY + 1)*2.0f, 0.0f));
-				height -= (y - cellY + 1); print ("HEIGHT: " + height);
+				height = newHeight; print ("HEIGHT: " + height);
 				cellY = y+1;
 			}
 			
@@ -94,9 +125,30 @@ public class Shaft : Room {
 		}
 	}
 
+	public override void DestroyRoom() {
+		// Delete any child objects
+		foreach(Transform child in transform) {
+			Destroy (child.gameObject);
+		}
+		// Update the connection lists in the other shafts that are connected to this one that is to be deleted
+		foreach(Shaft shaft in connectedShafts) {
+			shaft.connectedShafts.Remove (this);
+		}
+		// Finally, destroy the game object
+		Destroy (gameObject);
+	}
+
 	public void checkMerge(Room otherRoom) {
 		if (otherRoom == null) return;
 		if (otherRoom.GetType () == GetType ()) {
+			Shaft otherShaft = (Shaft)otherRoom;
+
+			// Merge other room into this room
+			// by adding other room's list of connected shafts
+			foreach(Shaft shaft in otherShaft.connectedShafts) {
+				shaft.addConnectedShaft (otherShaft);
+			}
+			// and by update height and position
 			if (otherRoom.transform.localPosition.y < transform.localPosition.y) {
 				transform.localPosition = otherRoom.transform.localPosition;
 
@@ -105,10 +157,12 @@ public class Shaft : Room {
 			height += otherRoom.height;
 			updateSprites ( height - 1);
 
-			foreach(Transform child in otherRoom.transform) {
-				Destroy (child.gameObject);
-			}
-			Destroy (otherRoom.gameObject);
+			// Resize array
+			Array.Resize(ref leftmostCells, height);
+			Array.Resize(ref rightmostCells, height);
+
+			// Delete other room
+			otherRoom.DestroyRoom ();
 		}
 	}
 
@@ -152,5 +206,15 @@ public class Shaft : Room {
 		} else {
 			spriteRenderer.sprite = bottomTexture;
 		}
+	}
+
+	// add connected shaft if it isn't in the list already
+	public void addConnectedShaft(Shaft addShaft) {
+		if (!connectedShafts.Contains (addShaft))
+			connectedShafts.Add (addShaft);
+	}
+
+	public void removeConnectedShaft(Shaft removeShaft) {
+		connectedShafts.Remove (removeShaft);
 	}
 }

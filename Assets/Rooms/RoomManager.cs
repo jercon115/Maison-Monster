@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 
 public class RoomManager : MonoBehaviour {
@@ -21,7 +21,7 @@ public class RoomManager : MonoBehaviour {
 
 	public void DeleteRoom(int x, int y) {
 		if (cells [x, y] != null && cells [x, y].monsters.Count == 0) {
-			cells[x, y].demolishCell(x, y);
+			cells[x, y].DemolishCell(x, y);
 
 			print ("Destroyed");
 		}
@@ -78,5 +78,40 @@ public class RoomManager : MonoBehaviour {
 		    y < 0 || y > cells.GetLength (1) - 1)
 			return false;
 		return true;
+	}
+
+	public void updateShaftsReachableRanges(int y1, int y2) {
+		Queue<Shaft> foundShafts = new Queue<Shaft>();
+		int numFoundShafts = 0;
+		int leftmost = -1, rightmost = -1;
+
+		for (int j = y1; j <= y2; j++) {
+			for(int i = 0; i < hotel.width; i++) {
+				if (cells[i, j] != null) {
+					if (cells[i, j] is Shaft) {
+						foundShafts.Enqueue ((Shaft)cells[i,j]);
+						numFoundShafts++;
+					}
+
+					if (leftmost == -1) {
+						leftmost = i; rightmost = i;
+					} else
+						rightmost++;
+				}
+
+				if (cells[i,j] == null || i == hotel.width-1) {
+					while(numFoundShafts > 0) {
+						Shaft shaft = foundShafts.Dequeue();
+						int index = j-shaft.cellY;
+						shaft.leftmostCells[index] = leftmost;
+						shaft.rightmostCells[index] = rightmost;
+
+						numFoundShafts--;
+					}
+
+					leftmost = -1; rightmost = -1;
+				}
+			}
+		}
 	}
 }

@@ -45,6 +45,14 @@ public class Room : MonoBehaviour {
 		transform.parent = roomMgr.transform;
 		transform.localPosition =
 			new Vector3 (x * 2.0f + (width-1), y * 2.0f + (height-1), 10.0f);
+
+		// Update room cells
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+				roomMgr.cells[cellX + i, cellY + j] = this;
+
+		// Update reachable ranges for any shafts in floors intersecting room
+		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
 	}
 
 	// Called when constructing this room
@@ -52,24 +60,34 @@ public class Room : MonoBehaviour {
 		// Initialize and setup room
 		Setup (myRoomMgr, x, y);
 
-		// Construction dust cloud effect and update room cells
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				roomMgr.cells[cellX + i, cellY + j] = this;
+		// Construction dust cloud effect
+		for (int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
 				Instantiate (ConstructionEffect, new Vector3 ((cellX + i) * 2.0f, (cellY + j) * 2.0f, 0.0f), Quaternion.identity);
-			}
-		}
+
 		// Popup text for cost
 		popupCostText (cellX * 2.0f + (width - 1) * 1.0f, cellY * 2.0f);
 	}
 	
-	public virtual void demolishCell(int x, int y) {
+	public virtual void DemolishCell(int x, int y) {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
 				Instantiate(ConstructionEffect, new Vector3((cellX+i)*2.0f, (cellY+j)*2.0f, 0.0f), Quaternion.identity);
 				roomMgr.cells[cellX + i, cellY +j] = null;
 			}
 		}
+		// Update reachable ranges for any shafts in floors intersecting room
+		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+
+		this.DestroyRoom ();
+	}
+
+	public virtual void DestroyRoom() {
+		// Delete any child objects
+		foreach(Transform child in transform) {
+			Destroy (child.gameObject);
+		}
+		// Destroy the game object
 		Destroy (gameObject);
 	}
 
