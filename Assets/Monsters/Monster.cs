@@ -158,7 +158,6 @@ public class Monster : MonoBehaviour {
 
 				return;
 			} else if (eatNeed > 0 && room.room_type == "eat") {
-				print ("EATING");
 				aiState = "EAT";
 				if (eatNeed % 50 == 0) {
 					int revenue = room.income;
@@ -245,7 +244,6 @@ public class Monster : MonoBehaviour {
 
 	void boundsCheck() {
 		if (transform.localPosition.x < -hotelBounds || transform.localPosition.x > 2.0f * hotelWidth + hotelBounds - 1.5f) {
-			print (hotelWidth);
 			if (sleepNeed > 0) { 
 				monsterManager.hotel.addHappiness (-200.0f);
 			} else {

@@ -52,7 +52,6 @@ public class Hotel : MonoBehaviour {
 		} else if (hp < 0.2 && hp > 0.0) {
 			hp_face.sprite = faces [0];
 		} else if (hp <= 0.0) {
-			print ("GameOver");
 			Application.LoadLevel("GameOver");
 		}
 	}
