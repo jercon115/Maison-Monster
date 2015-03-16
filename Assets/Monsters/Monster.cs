@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Monster : MonoBehaviour {
 	public MonsterManager monsterManager;
@@ -7,6 +7,10 @@ public class Monster : MonoBehaviour {
 
 	public bool prefersAlone;
 	public bool prefersCompany;
+
+	public Room targetRoom;
+
+	private RoomManager roomMgr;
 
 	private Animator animator;
 
@@ -27,6 +31,9 @@ public class Monster : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		//Initialize variables
+		roomMgr = monsterManager.roomManager;
+
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		animator = GetComponent<Animator>();
 		animator.Play("idle", -1, float.NegativeInfinity);
@@ -37,6 +44,10 @@ public class Monster : MonoBehaviour {
 		aiState = "IDLE";
 		aiStateDuration = Random.Range (120, 240);
 		sleepNeed = 1000; eatNeed = 500; funNeed = 500;
+
+		Queue<string> needs = getMonsterNeeds ();
+		while (needs.Count > 0)
+			print (needs.Dequeue ());
 
 		isLeaving = false;
 	}
@@ -103,7 +114,7 @@ public class Monster : MonoBehaviour {
 			int cellX = Mathf.FloorToInt (transform.localPosition.x / 2.0f + 0.5f),
 			cellY = Mathf.FloorToInt (transform.localPosition.y / 2.0f + 0.5f);
 
-			Room[,] cells = monsterManager.roomManager.cells;
+			Room[,] cells = roomMgr.cells;
 			if (cells [cellX, cellY] != null && cells [cellX, cellY].monsters.Count < cells [cellX, cellY].capacity) {
 					room = cells [cellX, cellY];
 					room.monsters.Add (this);
@@ -252,5 +263,69 @@ public class Monster : MonoBehaviour {
 			}
 			monsterManager.deleteMonster (this);
 		}
+	}
+
+	private int getRoomTypeID(string type) {
+		switch (type) {
+		case "sleep":
+			return 0;
+			
+		case "eat":
+			return 1;
+			
+		case "fun":
+			return 2;
+			
+		default:
+			return -1;
+		}
+	}
+
+	public int getNeedValue(string type) {
+		switch (type) {
+		case "sleep":
+			return sleepNeed;
+			
+		case "eat":
+			return eatNeed;
+			
+		case "fun":
+			return funNeed;
+			
+		default:
+			return -1;
+		}
+	}
+
+	public Queue<string> getMonsterNeeds() {
+		List<string> needs = new List<string> (new string[]{"sleep", "eat", "fun"});
+		Queue<string> returnNeeds = new Queue<string> ();
+
+		string maxNeed = ""; int maxNeedValue;
+		while (needs.Count > 0) {
+			maxNeed = "";
+			maxNeedValue = int.MinValue;
+
+			foreach(string need in needs) {
+				int needValue = getNeedValue(need);
+				if (needValue > maxNeedValue) {
+					maxNeedValue = needValue;
+					maxNeed = need;
+				}
+			}
+
+			if (maxNeed != "") {
+				if (maxNeedValue > 0) returnNeeds.Enqueue (maxNeed); // Check if max need and ignore needs at zero value
+				needs.Remove (maxNeed);
+			}
+		}
+
+		return returnNeeds;
+	}
+
+	public Queue<Shaft> getReachableShafts() {
+		Queue<Shaft> returnShafts = null;
+
+		return returnShafts;
 	}
 }

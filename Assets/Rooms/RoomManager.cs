@@ -166,6 +166,25 @@ public class RoomManager : MonoBehaviour {
 		}
 	}
 
+	public List<Shaft> getReachableShaftsAt(int x, int y) {
+		List<Shaft> returnShafts = new List<Shaft>();
+
+		// Check left first
+		int i = x;
+		while(i >= 0 && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) returnShafts.Add ((Shaft)cells[i,y]);
+			i--;
+		}
+		// Check right
+		i = x+1;
+		while(i < hotel.width && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) returnShafts.Add ((Shaft)cells[i,y]);
+			i++;
+		}
+
+		return returnShafts;
+	}
+
 	public void calculateShaftDistances(int x, int y) {
 		// Outside hotel?
 		if (x < 0 || x >= hotel.width || y < 0 || y > hotel.width)
@@ -176,20 +195,7 @@ public class RoomManager : MonoBehaviour {
 			return;
 
 		// Find shafts accessible from starting position
-		List<Shaft> startShafts = new List<Shaft>();
-
-		// Check left first
-		int i = x;
-		while(i >= 0 && (cells[i, y] != null || y == 0)) {
-			if (cells[i, y] is Shaft) startShafts.Add ((Shaft)cells[i,y]);
-			i--;
-		}
-		// Check right
-		i = x+1;
-		while(i < hotel.width && (cells[i, y] != null || y == 0)) {
-			if (cells[i, y] is Shaft) startShafts.Add ((Shaft)cells[i,y]);
-			i++;
-		}
+		List<Shaft> startShafts = getReachableShaftsAt (x, y);
 
 		// Initialize all of the hotel's shafts distances from target by setting them to -1
 		foreach(Shaft shaft in shafts) shaft.initDistancesFromStart ();
@@ -202,20 +208,7 @@ public class RoomManager : MonoBehaviour {
 		Stack<Shaft> path = new Stack<Shaft>();
 
 		// Find shafts accessible from starting position
-		Queue<Shaft> checkShafts = new Queue<Shaft>();
-		
-		// Check left first
-		int i = x;
-		while(i >= 0 && (cells[i, y] != null || y == 0)) {
-			if (cells[i, y] is Shaft) checkShafts.Enqueue ((Shaft)cells[i,y]);
-			i--;
-		}
-		// Check right
-		i = x+1;
-		while(i < hotel.width && (cells[i, y] != null || y == 0)) {
-			if (cells[i, y] is Shaft) checkShafts.Enqueue ((Shaft)cells[i,y]);
-			i++;
-		}
+		Queue<Shaft> checkShafts = new Queue<Shaft>(getReachableShaftsAt(x, y));
 
 		int dist = int.MaxValue; Shaft nextShaft = null;
 
