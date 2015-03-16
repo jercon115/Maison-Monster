@@ -27,7 +27,7 @@ public class Hotel : MonoBehaviour {
 	public Sprite[] stars;
 
 	void Start() {
-		gold = 2000;
+		gold = 10000;
 		maxHappiness = 1000; happiness = maxHappiness/2;
 		hp_face.sprite = faces [2];
 		hp_bar.value = happiness/maxHappiness;
@@ -61,7 +61,7 @@ public class Hotel : MonoBehaviour {
 	}
 
 	public void addStar (int num) {
-		numStars += num;
+		if (numStars < 5) numStars += num;
 		if (numStars  == 0) {
 			hud_stars[0].sprite = stars[0];
 			hud_stars[1].sprite = stars[0];
