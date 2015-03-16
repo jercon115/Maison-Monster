@@ -6,12 +6,15 @@ public class RoomManager : MonoBehaviour {
 	
 	public Hotel hotel;
 	public Room[,] cells;
+	public Matchmaker matchmaker;
 
+	public List<Room> lobbies;
 	public List<Shaft> shafts;
 
 	// Use this for initialization
 	public void Start () {
 		cells = new Room[hotel.width, hotel.height];
+		lobbies = new List<Room> ();
 
 		path = null; // TEST STACK FOR PATH
 	}
@@ -20,11 +23,22 @@ public class RoomManager : MonoBehaviour {
 		if (roomLocationValid (x, y, newroom.width, newroom.height)) {
 			Room tmpRoom = Instantiate (newroom) as Room;
 			tmpRoom.Construct (this, x, y);
+			switch (tmpRoom.room_type) {
+			case "lobby":
+				lobbies.Add (tmpRoom);
+				break;
+			case "misc":
+				break;
+			default:
+				matchmaker.matchRoom (tmpRoom);
+				break;
+			}
 		}
 	}
 
 	public void DeleteRoom(int x, int y) {
 		if (cells [x, y] != null && cells [x, y].monsters.Count == 0) {
+			if (cells [x, y].room_type == "lobby") lobbies.Remove (cells [x, y]);
 			cells[x, y].DemolishCell(x, y);
 
 			print ("Destroyed");
@@ -76,12 +90,28 @@ public class RoomManager : MonoBehaviour {
 	public Room getRoomAt(int x, int y) {
 		return cells[x, y];
 	}
-
+	
 	public bool roomExistsAt(int x, int y) {
 		if (x < 0 || x > cells.GetLength (0) - 1 ||
 		    y < 0 || y > cells.GetLength (1) - 1)
 			return false;
+		if (getRoomAt (x, y) == null)
+						return false;
 		return true;
+	}
+
+	public Room getNearestLobby (float xPos) {
+		int cellX = Mathf.FloorToInt (xPos / 2.0f + 0.5f);
+
+		int minDist = int.MaxValue; Room nearestLobby = null;
+		for (int i = 0; i < lobbies.Count; i++) {
+			int dist = Math.Abs (lobbies[i].cellX - cellX);
+			if (dist < minDist) {
+				minDist = dist; nearestLobby = lobbies[i];
+			}
+		}
+
+		return nearestLobby;
 	}
 
 	// Updates the reachable ranges of shafts in the corresponding floors

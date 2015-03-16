@@ -40,7 +40,7 @@ public class Matchmaker : MonoBehaviour {
 		Queue<string> needsOrder = monster.getMonsterNeeds ();
 
 		// Setup distance values
-
+		roomMgr.calculateShaftDistances(monster.room.cellX, monster.room.cellY);
 
 		while(needsOrder.Count > 0) {
 			int roomTypeID = getRoomTypeID(needsOrder.Dequeue());
@@ -68,9 +68,11 @@ public class Matchmaker : MonoBehaviour {
 				waitingRooms.Remove (targetRoom); // remove room from waiting list
 
 				// Create path
+				monster.path = roomMgr.createPathFromShaftDistances(targetRoom.cellX, targetRoom.cellY);
 
-				break; // Match made, can stop
+				break;
 			} else {
+				print ("NO ROOM FOUND");
 				if ( needsOrder.Count == 0) // No available rooms at all, need to add monster to waiting lists
 					makeMonsterWait (monster);
 			}
@@ -103,7 +105,8 @@ public class Matchmaker : MonoBehaviour {
 			targetMonster.targetRoom = room;
 			waitingMonsters.Remove (targetMonster); // remove room from waiting list
 
-			// Create path
+
+			targetMonster.path = roomMgr.createPathFromShaftDistances(room.cellX, room.cellY);
 		} else {
 			// No available monsters at all, need to add room to waiting lists
 			makeRoomWait (room);

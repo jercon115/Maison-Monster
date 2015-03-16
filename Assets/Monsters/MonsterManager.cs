@@ -6,6 +6,7 @@ public class MonsterManager : MonoBehaviour {
 	
 	public Hotel hotel;
 	public RoomManager roomManager;
+	public Matchmaker matchmaker;
 	public Monster[] monster_types;
 
 	public bool spawnEnemies;
@@ -23,10 +24,10 @@ public class MonsterManager : MonoBehaviour {
 	}
 
 	void Update () {
-		if (!spawnEnemies)
+		if (!spawnEnemies || roomManager.lobbies.Count <= 0)
 			return;
 
-		if (monsters.Count < 20 && spawnDuration <= 0) {
+		if (monsters.Count < 1 && spawnDuration <= 0) {
 			int randomMonster = Mathf.RoundToInt (Random.Range(0,monster_types.Length+1));
 			monsters.Add( Instantiate (monster_types[randomMonster]) as Monster );
 			monsters [monsters.Count - 1].monsterManager = this;
@@ -50,5 +51,9 @@ public class MonsterManager : MonoBehaviour {
 	public void deleteMonster(Monster monster) {
 		monsters.Remove (monster);
 		Destroy (monster.gameObject);
+	}
+
+	public void matchMonster(Monster mon) {
+		matchmaker.matchMonster (mon);
 	}
 }

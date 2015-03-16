@@ -10,7 +10,7 @@ public class Room : MonoBehaviour {
 	public int capacity;
 	public string room_type;
 	public List<Monster> monsters;
-
+	
 	private bool highlighted;
 
 	protected SpriteRenderer spriteRenderer;
@@ -110,6 +110,20 @@ public class Room : MonoBehaviour {
 		} else {
 			highlighted = true;
 			spriteRenderer.color = color;
+		}
+	}
+
+	public float getCenterXPos() {
+		return cellX * 2.0f + width - 1.0f;
+	}
+
+	public bool Enter(Monster mon) {
+		if (monsters.Count < capacity) {
+			monsters.Add (mon);
+			updateSprite ();
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
