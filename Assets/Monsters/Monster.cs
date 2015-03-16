@@ -12,6 +12,8 @@ public class Monster : MonoBehaviour {
 	private Room moveToRoom;
 	public Stack<Shaft> path;
 
+	public int targetY; // for use with shafts
+
 	private RoomManager roomMgr;
 
 	private Animator animator;

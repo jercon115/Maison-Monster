@@ -117,7 +117,7 @@ public class Room : MonoBehaviour {
 		return cellX * 2.0f + width - 1.0f;
 	}
 
-	public bool Enter(Monster mon) {
+	public virtual bool Enter(Monster mon) {
 		if (monsters.Count < capacity) {
 			monsters.Add (mon);
 			updateSprite ();
