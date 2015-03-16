@@ -12,7 +12,7 @@ public class Shaft : Room {
 	private int spriteCount;
 
 	// for use with pathfinding
-	private List<Shaft> connectedShafts;
+	public List<Shaft> connectedShafts;
 	
 	public int[] leftmostCells;
 	public int[] rightmostCells;
@@ -38,7 +38,7 @@ public class Shaft : Room {
 		leftmostCells = new int[height];
 		rightmostCells = new int[height];
 		for (int i = 0; i < height; i++) {
-			leftmostCells[i] = cellX; rightmostCells[i] = cellX;
+			leftmostCells[i] = -1; rightmostCells[i] = -1;
 		}
 
 		// Delete sprites that carried over from cloning
@@ -61,7 +61,8 @@ public class Shaft : Room {
 				roomMgr.cells[cellX + i, cellY + j] = this;
 
 		// Update reachable ranges for any shafts in floors intersecting room (will include this shaft)
-		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		Queue<Shaft> updatedShafts = roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		roomMgr.updateShaftsConnections (updatedShafts);
 	}
 
 	// Called when constructing this room
@@ -83,28 +84,36 @@ public class Shaft : Room {
 		// Update cell at x and y of deletion
 		roomMgr.cells [x, y] = null;
 
-		// Update reachable ranges for any shafts in floors intersecting room
-		roomMgr.updateShaftsReachableRanges (y, y);
+		// New room if the shaft was split into two
+		Shaft splitShaft = null;
 
 		if (height == 1) {
 			this.DestroyRoom ();
 		} else {
-			Shaft splitRoom = null;
+
 			
 			if (y == cellY + height - 1) { // top of shaft?
 				height--;
 			} else {
 				// Was the shaft split?
 				if ( y > cellY ) {
-					splitRoom = Instantiate (this) as Shaft;
+					splitShaft = Instantiate (this) as Shaft;
 
 					// Update room's name, height, and room manager's room cells, then setup
-					splitRoom.name = name;
-					splitRoom.height = y - cellY;
-					splitRoom.Setup (roomMgr, cellX, cellY);
+					splitShaft.name = name;
+					splitShaft.height = y - cellY;
+					splitShaft.Setup (roomMgr, cellX, cellY);
 					
 					// Update sprites for splitRoom
-					splitRoom.updateSprites(splitRoom.height - 1);
+					splitShaft.updateSprites(splitShaft.height - 1);
+
+					// Copy connections if still within range of floors
+					foreach(Shaft shaft in connectedShafts) {
+						if (shaft.cellY <= splitShaft.cellY + splitShaft.height - 1
+						    && shaft.cellY + shaft.height - 1 >= splitShaft.cellY)
+							splitShaft.connectShafts(shaft);
+
+					}
 				}
 
 				int newHeight = height - (y - cellY + 1);
@@ -119,10 +128,31 @@ public class Shaft : Room {
 				transform.Translate ( new Vector3(0.0f , (y - cellY + 1)*2.0f, 0.0f));
 				height = newHeight; print ("HEIGHT: " + height);
 				cellY = y+1;
+
+				// Check connections if still within range of floors
+				Queue<Shaft> removeShafts = new Queue<Shaft>();
+				foreach(Shaft shaft in connectedShafts) {
+					if (shaft.cellY > cellY + height - 1
+					    || shaft.cellY + shaft.height - 1 < cellY)
+						removeShafts.Enqueue (shaft);
+				}
+
+				while(removeShafts.Count > 0)
+					disconnectShafts(removeShafts.Dequeue ());
 			}
 			
 			updateSprites (height - 1);
 		}
+
+		// Update reachable ranges for any shafts in floors intersecting room
+		Queue<Shaft> updatedShafts = roomMgr.updateShaftsReachableRanges (y, y);
+
+		// Add this shaft and split off shaft (if any) to list of shafts to update connections for
+		if (!updatedShafts.Contains (this)) updatedShafts.Enqueue (this);
+		if (splitShaft != null &&!updatedShafts.Contains (splitShaft)) updatedShafts.Enqueue (splitShaft);
+
+		// Finally update connections
+		roomMgr.updateShaftsConnections (updatedShafts);
 	}
 
 	public override void DestroyRoom() {
@@ -146,7 +176,7 @@ public class Shaft : Room {
 			// Merge other room into this room
 			// by adding other room's list of connected shafts
 			foreach(Shaft shaft in otherShaft.connectedShafts) {
-				shaft.addConnectedShaft (otherShaft);
+				connectShafts (shaft);
 			}
 			// and by update height and position
 			if (otherRoom.transform.localPosition.y < transform.localPosition.y) {
@@ -208,13 +238,58 @@ public class Shaft : Room {
 		}
 	}
 
-	// add connected shaft if it isn't in the list already
-	public void addConnectedShaft(Shaft addShaft) {
-		if (!connectedShafts.Contains (addShaft))
-			connectedShafts.Add (addShaft);
+	// returns true if a cell is directly reachable from this shaft
+	public bool isReachable(int x, int y) {
+		int floor = y - cellY;
+		if (floor < 0 || floor >= height)
+			return false; // Not on a floor that shaft connects to
+
+		// otherwise check if x is within reachable range for that floor
+		return (x >= leftmostCells [floor] && x <= rightmostCells [floor]);
 	}
 
-	public void removeConnectedShaft(Shaft removeShaft) {
-		connectedShafts.Remove (removeShaft);
+	// add connected shaft if it isn't in the list already
+	public void connectShafts(Shaft addShaft) {
+		if (!connectedShafts.Contains (addShaft))
+			connectedShafts.Add (addShaft);
+
+		if (!addShaft.connectedShafts.Contains (this))
+			addShaft.connectedShafts.Add (this);
+	}
+
+	// remove a connection to another shaft
+	public void disconnectShafts(Shaft removeShaft) {
+		if (connectedShafts.Contains (removeShaft))
+			connectedShafts.Remove (removeShaft);
+		
+		if (removeShaft.connectedShafts.Contains (this))
+			removeShaft.connectedShafts.Remove (this);
+	}
+
+	public void checkAndUpdateConnection(Shaft otherShaft) {
+		// Get rance of overlapping floors
+		int y1 = Math.Max (cellY, otherShaft.cellY);
+		int y2 = Math.Min (cellY + height - 1, otherShaft.cellY + otherShaft.height - 1);
+
+		// Assume shafts are not connected for now
+		disconnectShafts (otherShaft);
+
+		// For each floor, check if each elevator are within each other's reachable ranges
+		// Technically they should be the same reachable ranges, however to be extra careful
+		for (int i = y1; i <= y2; i++) {
+			if(isReachable (otherShaft.cellX, i) && otherShaft.isReachable (cellX, i)) {
+				connectShafts(otherShaft); break; // Then shafts are connected, can stop checking
+			}
+		}
+	}
+
+	protected void drawAllConnections() {
+		foreach(Shaft shaft in connectedShafts) {
+			Debug.DrawLine (transform.localPosition, shaft.transform.localPosition, Color.green, Time.deltaTime, false);
+		}
+	}
+
+	void Update() {
+		drawAllConnections ();
 	}
 }

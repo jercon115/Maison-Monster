@@ -80,18 +80,26 @@ public class RoomManager : MonoBehaviour {
 		return true;
 	}
 
-	public void updateShaftsReachableRanges(int y1, int y2) {
+	// Updates the reachable ranges of shafts in the corresponding floors
+	// as well as returns a queue of shafts that were affected (the leftmost
+	// and rightmost values changed)
+	public Queue<Shaft> updateShaftsReachableRanges(int y1, int y2) {
+		// Queue for shafts whose reachable ranges were changed
+		// and thus may need to update connections, will return them
+		Queue<Shaft> returnShafts = new Queue<Shaft> ();
+
+		// Queue to hold shafts found that connects to current floor
+		// and whose reachable ranges may need to be updated
 		Queue<Shaft> foundShafts = new Queue<Shaft>();
-		int numFoundShafts = 0;
+
+		// Two integers to store leftmost and rightmost cells of current cluster
 		int leftmost = -1, rightmost = -1;
 
 		for (int j = y1; j <= y2; j++) {
 			for(int i = 0; i < hotel.width; i++) {
 				if (cells[i, j] != null) {
-					if (cells[i, j] is Shaft) {
+					if (cells[i, j] is Shaft)
 						foundShafts.Enqueue ((Shaft)cells[i,j]);
-						numFoundShafts++;
-					}
 
 					if (leftmost == -1) {
 						leftmost = i; rightmost = i;
@@ -100,18 +108,41 @@ public class RoomManager : MonoBehaviour {
 				}
 
 				if (cells[i,j] == null || i == hotel.width-1) {
-					while(numFoundShafts > 0) {
+					while(foundShafts.Count > 0) {
 						Shaft shaft = foundShafts.Dequeue();
 						int index = j-shaft.cellY;
-						shaft.leftmostCells[index] = leftmost;
-						shaft.rightmostCells[index] = rightmost;
 
-						numFoundShafts--;
+						// Check if reachable ranges changed => shaft was affected
+						if(shaft.leftmostCells[index] != leftmost || shaft.rightmostCells[index] != rightmost) {
+							// Add the shaft to list of affected shafts, they will need to update connections
+							if (!returnShafts.Contains (shaft))
+								returnShafts.Enqueue (shaft);
+
+							// Update shaft's reachable ranges
+							shaft.leftmostCells[index] = leftmost;
+							shaft.rightmostCells[index] = rightmost;
+						}
 					}
 
+					// reset leftmost found cell and rightmost found cell (new cluster of cells)
 					leftmost = -1; rightmost = -1;
 				}
 			}
+		}
+
+		return returnShafts;
+	}
+
+	public void updateShaftsConnections(Queue<Shaft> updatedShafts) {
+		// Update connections
+		Queue<Shaft> otherShafts; // Queue to hold other shafts
+		while(updatedShafts.Count > 0) {
+			Shaft shaft = updatedShafts.Dequeue ();
+			otherShafts = new Queue<Shaft>(updatedShafts);
+			
+			// check connections with other shafts
+			while(otherShafts.Count > 0)
+				shaft.checkAndUpdateConnection (otherShafts.Dequeue ());
 		}
 	}
 }

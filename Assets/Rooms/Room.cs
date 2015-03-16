@@ -52,7 +52,8 @@ public class Room : MonoBehaviour {
 				roomMgr.cells[cellX + i, cellY + j] = this;
 
 		// Update reachable ranges for any shafts in floors intersecting room
-		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		Queue<Shaft> updatedShafts = roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		roomMgr.updateShaftsConnections (updatedShafts);
 	}
 
 	// Called when constructing this room
@@ -77,7 +78,8 @@ public class Room : MonoBehaviour {
 			}
 		}
 		// Update reachable ranges for any shafts in floors intersecting room
-		roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		Queue<Shaft> updatedShafts = roomMgr.updateShaftsReachableRanges (cellY, cellY + height - 1);
+		roomMgr.updateShaftsConnections (updatedShafts);
 
 		this.DestroyRoom ();
 	}
