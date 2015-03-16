@@ -130,6 +130,7 @@ public class Monster : MonoBehaviour {
 			} else {
 				ground = 0.0f;
 			}
+			targetRoom = null; moveToRoom = null; path.Clear ();
 
 			transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
 			updateAI (true); print ("RESET");
@@ -139,22 +140,25 @@ public class Monster : MonoBehaviour {
 
 	// AI for the monster
 	void updateAI(bool reset) {
-		// Have target room? //
+		// Inside room? //
+		if (room != null) {
+			spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+
+			if (fillNeed (room.room_type)) {
+				aiState = "BUSY";
+				return;
+			} else {
+				targetRoom = null;
+			}
+		}
+
+		// Get target room and next in path //
 		if (targetRoom == null) {
 			// Get a target room //
 			getTargetRoom();
 		} else {
-			// At destination ? //
-			if (room == targetRoom) {
-				if (fillNeed (room.room_type)) {
-					aiState = "BUSY";
-				} else {
-					targetRoom = null;
-				}
-
-				spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
-			// Continue following path //
-			} else if (moveToRoom == null) {
+			// Follow path //
+			if (moveToRoom == null) {
 				// Change monster to gray to show that it is outside room
 				if (room == null && sleepNeed > 0) {
 					spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
@@ -164,10 +168,9 @@ public class Monster : MonoBehaviour {
 					isLeaving = true;
 				}
 
-
 				// Follow path to next in path //
 				if (path.Count > 0) {
-					moveToRoom = path.Pop(); print (moveToRoom);
+					moveToRoom = path.Pop();
 				// In target level, move to target room //
 				} else {
 					moveToRoom = targetRoom;
@@ -191,7 +194,6 @@ public class Monster : MonoBehaviour {
 				// Try and enter, if full, wait //
 				if (moveToRoom.Enter (this)) {
 					room = moveToRoom; moveToRoom = null;
-
 					collisionCheck ();
 				} else
 					animator.Play ("idle", -1, float.NegativeInfinity);
@@ -214,6 +216,8 @@ public class Monster : MonoBehaviour {
 					transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
 
 					animator.Play ("walk", -1, float.NegativeInfinity);
+					transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
+					collisionCheck();
 				} else if (aiState != "IDLE") {
 					aiState = "IDLE";
 					aiStateDuration = Random.Range (120, 240);
@@ -224,17 +228,12 @@ public class Monster : MonoBehaviour {
 				aiStateDuration -= 1;
 			}
 		}
-		
-		if (aiState == "MOVE") {
-			transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
-			collisionCheck();
-		}
 
 		return;
 	}
 
 	void getTargetRoom() {
-		if (room != null ) {
+		if (room != null) {
 			monsterManager.matchMonster(this);
 		} else {
 			targetRoom = roomMgr.getNearestLobby(transform.localPosition.x);
@@ -243,13 +242,15 @@ public class Monster : MonoBehaviour {
 			room.monsters.Remove (this);
 			room.updateSprite ();
 			room = null;
-		} else
+		} else {
 			aiState = "IDLE";
+		}
 	}
 
 	bool fillNeed(string room_type) {
 		int needValue = getNeedValue (room_type);
-			
+		if (needValue <= 0) return false;
+
 		if (needValue % 50 == 0) {
 			int revenue = room.income;
 			
@@ -278,12 +279,8 @@ public class Monster : MonoBehaviour {
 				break;
 			}
 
-		if (needValue > 0) {
-			spriteRenderer.sortingOrder = 0;
-			return true;
-		}
-		
-		return false;
+		spriteRenderer.sortingOrder = 0;
+		return true;
 	}
 
 	void collisionCheck () {

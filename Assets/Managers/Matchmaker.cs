@@ -72,7 +72,6 @@ public class Matchmaker : MonoBehaviour {
 
 				break;
 			} else {
-				print ("NO ROOM FOUND");
 				if ( needsOrder.Count == 0) // No available rooms at all, need to add monster to waiting lists
 					makeMonsterWait (monster);
 			}
