@@ -274,7 +274,7 @@ public class Shaft : Room {
 	}
 
 	public void checkAndUpdateConnection(Shaft otherShaft) {
-		// Get rance of overlapping floors
+		// Get range of overlapping floors
 		int y1 = Math.Max (cellY, otherShaft.cellY);
 		int y2 = Math.Min (cellY + height - 1, otherShaft.cellY + otherShaft.height - 1);
 
@@ -288,6 +288,26 @@ public class Shaft : Room {
 				connectShafts(otherShaft); break; // Then shafts are connected, can stop checking
 			}
 		}
+	}
+
+	public void getConnectionFloor(Shaft otherShaft, int y) {
+		int y1 = Math.Max (cellY, otherShaft.cellY);
+		int y2 = Math.Min (cellY + height - 1, otherShaft.cellY + otherShaft.height - 1);
+
+		int dist = int.MaxValue; int returnFloor = -1;
+		for (int i = y1; i <= y2; i++) {
+			// Check if reachable
+			if(isReachable (otherShaft.cellX, i) && otherShaft.isReachable (cellX, i)) {
+				int newDist = Mathf.Abs (i - y);
+
+				if (newDist < dist) {
+					dist = newDist;
+					returnFloor = i;
+				}
+			}
+		}
+
+		return returnFloor;
 	}
 
 	// Calculates distances from a single source for use with findPath
@@ -310,6 +330,7 @@ public class Shaft : Room {
 	// For debugging purposes
 	protected void drawAllConnections() {
 		foreach(Shaft shaft in connectedShafts) {
+			if (shaft == null) continue;
 			Debug.DrawLine (transform.localPosition, shaft.transform.localPosition, Color.green, Time.deltaTime, false);
 		}
 	}
