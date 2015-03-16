@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
-
 
 public class RoomManager : MonoBehaviour {
 	
 	public Hotel hotel;
 	public Room[,] cells;
 
+	public List<Shaft> shafts;
+
 	// Use this for initialization
 	public void Start () {
 		cells = new Room[hotel.width, hotel.height];
+
+		path = null; // TEST STACK FOR PATH
 	}
 
 	public void MakeRoom(int x, int y, Room newroom) {
@@ -97,6 +101,22 @@ public class RoomManager : MonoBehaviour {
 
 		for (int j = y1; j <= y2; j++) {
 			for(int i = 0; i < hotel.width; i++) {
+				// Ground floor all reachable
+				if (j == 0) {
+					if (cells[i,j] is Shaft) {
+						Shaft shaft = (Shaft)cells[i,j];
+						int index = j-shaft.cellY;
+
+						shaft.leftmostCells[index] = 0;
+						shaft.rightmostCells[index] = hotel.width-1;
+
+						if (!returnShafts.Contains (shaft))
+							returnShafts.Enqueue (shaft); // Check connections no matter what
+					}
+
+					continue;
+				}
+
 				if (cells[i, j] != null) {
 					if (cells[i, j] is Shaft)
 						foundShafts.Enqueue ((Shaft)cells[i,j]);
@@ -143,6 +163,152 @@ public class RoomManager : MonoBehaviour {
 			// check connections with other shafts
 			while(otherShafts.Count > 0)
 				shaft.checkAndUpdateConnection (otherShafts.Dequeue ());
+		}
+	}
+
+	public void calculateShaftDistances(int x, int y) {
+		// Outside hotel?
+		if (x < 0 || x >= hotel.width || y < 0 || y > hotel.width)
+			return;
+
+		// Pointing to empty cell above ground level?
+		if (cells [x, y] == null && y > 0)
+			return;
+
+		// Find shafts accessible from starting position
+		List<Shaft> startShafts = new List<Shaft>();
+
+		// Check left first
+		int i = x;
+		while(i >= 0 && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) startShafts.Add ((Shaft)cells[i,y]);
+			i--;
+		}
+		// Check right
+		i = x+1;
+		while(i < hotel.width && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) startShafts.Add ((Shaft)cells[i,y]);
+			i++;
+		}
+
+		// Initialize all of the hotel's shafts distances from target by setting them to -1
+		foreach(Shaft shaft in shafts) shaft.initDistancesFromStart ();
+
+		// Calculate distances from target
+		foreach(Shaft shaft in startShafts) shaft.calculateDistancesFromStart (-1);
+	}
+
+	public Stack<Shaft> createPathFromShaftDistances(int x, int y) {
+		Stack<Shaft> path = new Stack<Shaft>();
+
+		// Find shafts accessible from starting position
+		Queue<Shaft> checkShafts = new Queue<Shaft>();
+		
+		// Check left first
+		int i = x;
+		while(i >= 0 && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) checkShafts.Enqueue ((Shaft)cells[i,y]);
+			i--;
+		}
+		// Check right
+		i = x+1;
+		while(i < hotel.width && (cells[i, y] != null || y == 0)) {
+			if (cells[i, y] is Shaft) checkShafts.Enqueue ((Shaft)cells[i,y]);
+			i++;
+		}
+
+		int dist = int.MaxValue; Shaft nextShaft = null;
+
+		// Go through each shaft in queue and find one with minimum distance
+		while (checkShafts.Count > 0) {
+			Shaft checkShaft = checkShafts.Dequeue ();
+
+			// If ditance is less than current minimum distance found so far, update
+			// minimum distance found so far and also the the next shaft to take
+			if (checkShaft.distFromStart < dist && checkShaft.distFromStart > -1) {
+				dist = checkShaft.distFromStart;
+				nextShaft = checkShaft;
+			}
+
+			// If the queue is empty, then we've checked all shafts, add onto path
+			// and get the next set of connected shafts if we haven't reached the end
+			// Also check if the minimum found distance is zero, which means we can stop
+			if (checkShafts.Count == 0 || dist == 0) {
+				// If a shaft was not found, then that means we've hit a dead end, return
+				// an empty path to signal that no path is possible
+				if (nextShaft == null) {
+					path.Clear ();
+					return path;
+				}
+
+				path.Push (nextShaft); // Add shaft with minimunm found distance to path
+
+				// If the minimum found distance is 0, then we've reached the end
+				if (dist == 0) {
+					checkShafts.Clear ();
+					break;
+				}
+
+				// Add connected shafts to queue
+				foreach(Shaft shaft in nextShaft.connectedShafts)
+					checkShafts.Enqueue (shaft);
+
+				nextShaft = null; // Set nextShaft to null to initialize for next set of shafts
+			}
+		}
+
+		return path;
+	}
+
+	private Vector2 getMouseCell() {
+		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		int x = Mathf.FloorToInt (mousePos.x/2.0f + 0.5f);
+		int y = Mathf.FloorToInt (mousePos.y/2.0f + 0.5f);
+
+		return new Vector2 (x, y);
+	}
+
+	public Stack<Shaft> path; // TEST STACK FOR PATH
+
+	void Update() {
+		Vector2 mouseCell;
+		int x, y;
+
+		if (Input.GetKeyDown (KeyCode.Q)) {
+			mouseCell = getMouseCell ();
+			x = (int)mouseCell.x; y = (int)mouseCell.y;
+
+			if (x >= 0 && x < hotel.width && y >= 0 && y < hotel.height)
+				calculateShaftDistances (x, y);
+		} else {
+			if (Input.GetKeyDown (KeyCode.E)){
+				mouseCell = getMouseCell ();
+				x = (int)mouseCell.x; y = (int)mouseCell.y;
+				
+				if (x >= 0 && x < hotel.width && y >= 0 && y < hotel.height)
+					path = createPathFromShaftDistances (x,y);
+			}
+		}
+
+		if (path != null)
+			drawPath ();
+	}
+
+	private void drawPath() {
+		if (path.Count == 0)
+			return;
+
+		Stack<Shaft> drawStack = new Stack<Shaft> (path);
+
+		Shaft shaft = drawStack.Pop ();
+		Vector3 drawPos = shaft.transform.localPosition + new Vector3(0.0f,0.5f,0.0f);
+
+		while (drawStack.Count > 0) {
+			shaft = drawStack.Pop ();
+			Vector3 nextPos = shaft.transform.localPosition+ new Vector3(0.0f,0.5f,0.0f);
+
+			Debug.DrawLine (drawPos, nextPos, Color.red, Time.deltaTime, false);
+			drawPos = nextPos;
 		}
 	}
 }

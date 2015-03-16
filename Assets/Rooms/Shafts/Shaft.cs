@@ -17,7 +17,7 @@ public class Shaft : Room {
 	public int[] leftmostCells;
 	public int[] rightmostCells;
 
-	private int distFromStart;
+	public int distFromStart;
 
 	// Initializing variables and position, called when constructing this room and cloning a shaft during a split
 	public override void Setup(RoomManager myRoomMgr, int x, int y) {
@@ -32,7 +32,9 @@ public class Shaft : Room {
 		spriteRenderer = GetComponent<SpriteRenderer>();
 		spriteCount = 0;
 		sprites = new Stack<GameObject>();
+
 		connectedShafts = new List<Shaft> ();
+		distFromStart = -1; // -1 means there is no currently known path between shaft to target
 
 		// Initialize values for array for leftmost cells and rightmost cells at each floor
 		leftmostCells = new int[height];
@@ -40,6 +42,10 @@ public class Shaft : Room {
 		for (int i = 0; i < height; i++) {
 			leftmostCells[i] = -1; rightmostCells[i] = -1;
 		}
+
+		// Add shaft to room manager's list of shafts
+		if (!roomMgr.shafts.Contains (this))
+			roomMgr.shafts.Add (this);
 
 		// Delete sprites that carried over from cloning
 		foreach(Transform child in transform) {
@@ -89,6 +95,7 @@ public class Shaft : Room {
 
 		if (height == 1) {
 			this.DestroyRoom ();
+			return;
 		} else {
 
 			
@@ -107,11 +114,11 @@ public class Shaft : Room {
 					// Update sprites for splitRoom
 					splitShaft.updateSprites(splitShaft.height - 1);
 
-					// Copy connections if still within range of floors
+					// Copy connections if still connected
 					foreach(Shaft shaft in connectedShafts) {
 						if (shaft.cellY <= splitShaft.cellY + splitShaft.height - 1
 						    && shaft.cellY + shaft.height - 1 >= splitShaft.cellY)
-							splitShaft.connectShafts(shaft);
+							splitShaft.checkAndUpdateConnection(shaft);
 
 					}
 				}
@@ -129,16 +136,11 @@ public class Shaft : Room {
 				height = newHeight; print ("HEIGHT: " + height);
 				cellY = y+1;
 
-				// Check connections if still within range of floors
-				Queue<Shaft> removeShafts = new Queue<Shaft>();
-				foreach(Shaft shaft in connectedShafts) {
-					if (shaft.cellY > cellY + height - 1
-					    || shaft.cellY + shaft.height - 1 < cellY)
-						removeShafts.Enqueue (shaft);
-				}
+				// Check connections
+				Queue<Shaft> checkShafts = new Queue<Shaft>(connectedShafts);
 
-				while(removeShafts.Count > 0)
-					disconnectShafts(removeShafts.Dequeue ());
+				while(checkShafts.Count > 0)
+					checkAndUpdateConnection(checkShafts.Dequeue ());
 			}
 			
 			updateSprites (height - 1);
@@ -161,9 +163,14 @@ public class Shaft : Room {
 			Destroy (child.gameObject);
 		}
 		// Update the connection lists in the other shafts that are connected to this one that is to be deleted
-		foreach(Shaft shaft in connectedShafts) {
-			shaft.connectedShafts.Remove (this);
-		}
+		Queue<Shaft> removeShafts = new Queue<Shaft> (connectedShafts);
+		while(removeShafts.Count > 0)
+			disconnectShafts (removeShafts.Dequeue ());
+
+		// Remove from room manager's list of shafts
+		if (roomMgr.shafts.Contains (this))
+			roomMgr.shafts.Remove (this);
+
 		// Finally, destroy the game object
 		Destroy (gameObject);
 	}
@@ -283,6 +290,24 @@ public class Shaft : Room {
 		}
 	}
 
+	// Calculates distances from a single source for use with findPath
+	public void calculateDistancesFromStart(int prevDist) {
+		int newDist = prevDist + 1;
+
+		if (distFromStart >= 0 && distFromStart < newDist)
+			return;
+
+		distFromStart = newDist;
+		foreach (Shaft shaft in connectedShafts)
+			shaft.calculateDistancesFromStart (newDist);
+	}
+
+	// Initializes distFromTarget for calculateDistancesFromStart
+	public void initDistancesFromStart() {
+		distFromStart = -1;
+	}
+
+	// For debugging purposes
 	protected void drawAllConnections() {
 		foreach(Shaft shaft in connectedShafts) {
 			Debug.DrawLine (transform.localPosition, shaft.transform.localPosition, Color.green, Time.deltaTime, false);

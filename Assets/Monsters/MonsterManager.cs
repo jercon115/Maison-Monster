@@ -8,6 +8,8 @@ public class MonsterManager : MonoBehaviour {
 	public RoomManager roomManager;
 	public Monster[] monster_types;
 
+	public bool spawnEnemies;
+
 	private List<Monster> monsters;
 
 	private int spawnDuration;
@@ -21,7 +23,9 @@ public class MonsterManager : MonoBehaviour {
 	}
 
 	void Update () {
-		/*
+		if (!spawnEnemies)
+			return;
+
 		if (monsters.Count < 20 && spawnDuration <= 0) {
 			int randomMonster = Mathf.RoundToInt (Random.Range(0,monster_types.Length+1));
 			monsters.Add( Instantiate (monster_types[randomMonster]) as Monster );
@@ -41,7 +45,6 @@ public class MonsterManager : MonoBehaviour {
 		if (spawnDuration > 0) {
 			spawnDuration--;
 		}
-		*/
 	}
 
 	public void deleteMonster(Monster monster) {
