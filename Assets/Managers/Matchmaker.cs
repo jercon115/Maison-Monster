@@ -39,7 +39,7 @@ public class Matchmaker : MonoBehaviour {
 	public void matchMonster(Monster monster) {
 		Queue<string> needsOrder = monster.getMonsterNeeds ();
 
-		// Setup distance values
+		// Setup distance values from monster as single source
 		roomMgr.calculateShaftDistances(monster.room.cellX, monster.room.cellY);
 
 		while(needsOrder.Count > 0) {
@@ -82,7 +82,10 @@ public class Matchmaker : MonoBehaviour {
 	public void matchRoom(Room room) {
 		int roomTypeID = getRoomTypeID(room.room_type);
 		List<Monster> waitingMonsters = monsterWaitlists[roomTypeID];
-		
+
+		// Setup distance values from room as single source
+		roomMgr.calculateShaftDistances (room.cellX, room.cellY);
+
 		// If there are rooms available, match monster and room, otherwise, make monster wait
 		int minDist = int.MaxValue; Monster targetMonster = null;
 		foreach(Monster monster in waitingMonsters) {
@@ -105,12 +108,22 @@ public class Matchmaker : MonoBehaviour {
 			targetMonster.targetRoom = room;
 			waitingMonsters.Remove (targetMonster); // remove room from waiting list
 
-
-			targetMonster.path = roomMgr.createPathFromShaftDistances(room.cellX, room.cellY);
+			// Need to flip path because path was from room to monster
+			targetMonster.path = flipPath(roomMgr.createPathFromShaftDistances(room.cellX, room.cellY));
 		} else {
 			// No available monsters at all, need to add room to waiting lists
 			makeRoomWait (room);
 		}
+	}
+
+	private Stack<Shaft> flipPath(Stack<Shaft> oldPath) {
+		Stack<Shaft> newPath = new Stack<Shaft> ();
+
+		while (oldPath.Count > 0) {
+			newPath.Push (oldPath.Pop ());
+		}
+
+		return newPath;
 	}
 	
 	private void makeMonsterWait(Monster monster) {
