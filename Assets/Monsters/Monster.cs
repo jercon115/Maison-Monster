@@ -103,11 +103,12 @@ public class Monster : MonoBehaviour {
 			}
 		}
 		// Change monster to gray to show that it is outside room
+		float annoyanceHue = (500.0f - annoyance)/500.0f;
 		if (room == null) {
 			if (floor < 0) {
-				spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.65f);
+				spriteRenderer.color = new Color(0.5f, 0.5f * annoyanceHue, 0.5f * annoyanceHue, 0.65f);
 			} else {
-				spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+				spriteRenderer.color = new Color(0.5f, 0.5f * annoyanceHue, 0.5f * annoyanceHue, 1.0f);
 			}
 		}
 	}
@@ -122,7 +123,7 @@ public class Monster : MonoBehaviour {
 				roomMgr.matchmaker.matchRoom (room);
 				room.updateSprite ();
 			}
-			room = null;
+			room = null; moveToRoom = null; moveToRoom = null; floor = -1; ground = 0.0f;
 			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 		}
 	}
@@ -144,10 +145,9 @@ public class Monster : MonoBehaviour {
 				floor = cellY;
 				transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 			} else {
-				floor = -1; ground = 0.0f;
 				getTargetRoom ();
 			}
-			moveToRoom = null; path.Clear (); 
+			path.Clear (); 
 			 
 
 			transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
@@ -159,6 +159,7 @@ public class Monster : MonoBehaviour {
 	// AI for the monster
 	void updateAI(bool reset) {
 		if (isLeaving && floor == -1) {
+			if (annoyance > 0) annoyance -= 1;
 			transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
 			boundsCheck();
 			return;
@@ -167,6 +168,7 @@ public class Monster : MonoBehaviour {
 		// Inside room? //
 		if (room != null) {
 			if (fillNeed (room.room_type)) {
+				if (annoyance > 0) annoyance -= 1;
 				aiState = "BUSY";
 				return;
 			} else {
@@ -219,10 +221,15 @@ public class Monster : MonoBehaviour {
 				} else
 					animator.Play ("idle", -1, float.NegativeInfinity);
 			}
+			if (annoyance > 0) annoyance -= 1;
 			return;
 		}
 
-		if (annoyance < 500) annoyance += 1;
+		if (annoyance < 500) {
+			annoyance += 1;
+		} else {
+			monsterManager.hotel.addHappiness(-0.2f);
+		}
 
 		return;
 	}
@@ -256,11 +263,12 @@ public class Monster : MonoBehaviour {
 			
 			monsterManager.hotel.gold += revenue;
 
+			float annoyanceHue = (500.0f - annoyance)/500.0f;
 			if (room_type == "fun" || room_type == "eat" || room_type == "health") {
-				spriteRenderer.color = new Color(0f, 1f, 1f, 1f);
+				spriteRenderer.color = new Color(0f, 1f * annoyanceHue, 1f * annoyanceHue, 1f);
 				monsterManager.hotel.addHappiness (1.0f);
 			} else {
-				spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+				spriteRenderer.color = new Color(1f, 1f * annoyanceHue, 1f * annoyanceHue, 1f);
 			}
 
 			Vector3 popUpPos = transform.localPosition; popUpPos.y += 1.0f; popUpPos.z = -5.0f;
@@ -306,11 +314,6 @@ public class Monster : MonoBehaviour {
 
 	void boundsCheck() {
 		if (transform.localPosition.x < -hotelBounds || transform.localPosition.x > 2.0f * hotelWidth + hotelBounds - 1.5f) {
-			if (sleepNeed > 0) { 
-				monsterManager.hotel.addHappiness (-200.0f);
-			} else {
-
-			}
 			monsterManager.deleteMonster (this);
 		}
 	}
@@ -405,7 +408,11 @@ public class Monster : MonoBehaviour {
 	}
 
 	public void leaveRoom(bool bailout , bool findNewRoom) {
-		if (bailout) floor = -1;
+		moveToRoom = null; 
+		if (bailout) {
+			floor = -1;
+			ground = 0.0f;
+		}
 
 		if (room != null) {
 			room.monsters.Remove (this);
