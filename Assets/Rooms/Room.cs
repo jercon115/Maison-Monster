@@ -85,6 +85,14 @@ public class Room : MonoBehaviour {
 	}
 
 	public virtual void DestroyRoom() {
+		// Bailout any monsters
+		Queue<Monster> removeMonsters = new Queue<Monster> (monsters);
+		while(removeMonsters.Count > 0) {
+			Monster monster = removeMonsters.Dequeue ();
+			monster.leaveRoom (true, true);
+		}
+		monsters.Clear ();
+
 		// Delete any child objects
 		foreach(Transform child in transform) {
 			Destroy (child.gameObject);

@@ -127,11 +127,11 @@ public class Monster : MonoBehaviour {
 
 			Room[,] cells = roomMgr.cells;
 			if (cells [cellX, cellY] != null && cells [cellX, cellY].monsters.Count < cells [cellX, cellY].capacity) {
-					room = cells [cellX, cellY]; targetRoom = room;
-					room.monsters.Add (this);
-					room.updateSprite ();
-					floor = cellY;
-					transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
+				room = cells [cellX, cellY]; targetRoom = room;
+				room.monsters.Add (this);
+				room.updateSprite ();
+				floor = cellY;
+				transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 			} else {
 				floor = -1; ground = 0.0f;
 				getTargetRoom ();
@@ -258,9 +258,11 @@ public class Monster : MonoBehaviour {
 		}
 
 		if (targetRoom != null) {
-			room.monsters.Remove (this);
-			room.updateSprite ();
-			roomMgr.matchmaker.matchRoom (room);
+			if (room != null) {
+				room.monsters.Remove (this);
+				room.updateSprite ();
+				roomMgr.matchmaker.matchRoom (room);
+			}
 			room = null;
 		} else {
 			aiState = "IDLE";
@@ -416,5 +418,18 @@ public class Monster : MonoBehaviour {
 		
 
 		return returnShafts;
+	}
+
+	public void leaveRoom(bool bailout , bool findNewRoom) {
+		if (bailout) floor = -1;
+
+		if (room != null) {
+			room.monsters.Remove (this);
+			room.updateSprite ();
+			room = null;
+		}
+		
+		if (findNewRoom)
+			getTargetRoom ();
 	}
 }

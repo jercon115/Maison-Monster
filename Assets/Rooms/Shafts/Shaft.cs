@@ -93,14 +93,31 @@ public class Shaft : Room {
 		// New room if the shaft was split into two
 		Shaft splitShaft = null;
 
+		// Handle monsters
+		Queue<Monster> bottomMonsters = new Queue<Monster> ();
+		Queue<Monster> topMonsters = new Queue<Monster> ();
+
+		foreach (Monster monster in monsters) {
+			int monY = Mathf.FloorToInt(monster.transform.localPosition.y/2.0f+0.5f);
+
+			if (monY == y) { // At location of cut
+				monster.leaveRoom(true, true);
+			} else if (monY > y) { // Above location of cut
+				topMonsters.Enqueue (monster);
+			} else { // Below location of cut
+				bottomMonsters.Enqueue (monster);
+			}
+		}
+
 		if (height == 1) {
 			this.DestroyRoom ();
 			return;
 		} else {
-
-			
 			if (y == cellY + height - 1) { // top of shaft?
 				height--;
+
+				while(topMonsters.Count > 0)
+					topMonsters.Dequeue ().leaveRoom (true, true);
 			} else {
 				// Was the shaft split?
 				if ( y > cellY ) {
@@ -113,6 +130,15 @@ public class Shaft : Room {
 					
 					// Update sprites for splitRoom
 					splitShaft.updateSprites(splitShaft.height - 1);
+
+					// Transfer bottom monsters to other shaft
+					while(bottomMonsters.Count > 0) {
+						Monster monster = bottomMonsters.Dequeue ();
+
+						monster.room = (Room)splitShaft;
+						splitShaft.monsters.Add (monster);
+						monsters.Remove (monster);
+					}
 
 					// Copy connections if still connected
 					foreach(Shaft shaft in connectedShafts) {
@@ -158,6 +184,14 @@ public class Shaft : Room {
 	}
 
 	public override void DestroyRoom() {
+		// Bailout any monsters
+		Queue<Monster> removeMonsters = new Queue<Monster> (monsters);
+		while(removeMonsters.Count > 0) {
+			Monster monster = removeMonsters.Dequeue ();
+			monster.leaveRoom (true, true);
+		}
+		monsters.Clear ();
+
 		// Delete any child objects
 		foreach(Transform child in transform) {
 			Destroy (child.gameObject);
@@ -181,6 +215,12 @@ public class Shaft : Room {
 			Shaft otherShaft = (Shaft)otherRoom;
 
 			// Merge other room into this room
+			// by adding other room's list of monsters
+			foreach(Monster monster in otherShaft.monsters) {
+				monster.room = this;
+				monsters.Add (monster);
+			}
+			otherShaft.monsters.Clear ();
 			// by adding other room's list of connected shafts
 			foreach(Shaft shaft in otherShaft.connectedShafts) {
 				connectShafts (shaft);

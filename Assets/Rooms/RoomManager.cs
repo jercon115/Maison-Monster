@@ -35,7 +35,7 @@ public class RoomManager : MonoBehaviour {
 	}
 
 	public void DeleteRoom(int x, int y) {
-		if (cells [x, y] != null && cells [x, y].monsters.Count == 0) {
+		if (cells [x, y] != null) {
 			if (cells [x, y].room_type == "lobby") lobbies.Remove (cells [x, y]);
 			cells[x, y].DemolishCell(x, y);
 
