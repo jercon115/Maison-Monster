@@ -122,7 +122,7 @@ public class Monster : MonoBehaviour {
 				roomMgr.matchmaker.matchRoom (room);
 				room.updateSprite ();
 			}
-			room = null;
+			room = null; moveToRoom = null; moveToRoom = null; floor = -1; ground = 0.0f;
 			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 		}
 	}
@@ -144,10 +144,9 @@ public class Monster : MonoBehaviour {
 				floor = cellY;
 				transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 			} else {
-				floor = -1; ground = 0.0f;
 				getTargetRoom ();
 			}
-			moveToRoom = null; path.Clear (); 
+			path.Clear (); 
 			 
 
 			transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
@@ -405,7 +404,11 @@ public class Monster : MonoBehaviour {
 	}
 
 	public void leaveRoom(bool bailout , bool findNewRoom) {
-		if (bailout) floor = -1;
+		moveToRoom = null; 
+		if (bailout) {
+			floor = -1;
+			ground = 0.0f;
+		}
 
 		if (room != null) {
 			room.monsters.Remove (this);
