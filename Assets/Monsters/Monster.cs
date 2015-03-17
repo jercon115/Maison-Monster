@@ -23,7 +23,8 @@ public class Monster : MonoBehaviour {
 
 	private int hotelWidth;
 	private float hotelBounds = 8.0f;
-	private float ground = 0.0f;
+	public float ground = 0.0f;
+	public int floor = -1;
 
 	private float speed;
 	private float velY;
@@ -57,6 +58,8 @@ public class Monster : MonoBehaviour {
 			print (needs.Dequeue ());
 
 		isLeaving = false;
+
+		getTargetRoom ();
 	}
 
 	public void Initialize(int startHotelWidth) {
@@ -77,8 +80,9 @@ public class Monster : MonoBehaviour {
 			transform.localPosition = new Vector3 (mousePos.x, mousePos.y - 1, 100.0f);
 		} else {
 			// Check if above ground first
-			if (room != null) ground = room.transform.localPosition.y;
+			if (floor >= 0) ground = floor * 2.0f;
 
+			if (room != null && room.room_type == "shaft") return;
 			if (transform.localPosition.y + 1 > ground) {
 				velY -= 0.01f;
 				transform.Translate(new Vector3(0.0f, velY, 0.0f));
@@ -103,8 +107,9 @@ public class Monster : MonoBehaviour {
 			clicked = true;
 
 			if (room != null) {
-					room.monsters.Remove (this);
-					room.updateSprite ();
+				room.monsters.Remove (this);
+				roomMgr.matchmaker.matchRoom (room);
+				room.updateSprite ();
 			}
 			room = null;
 			transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
@@ -122,15 +127,17 @@ public class Monster : MonoBehaviour {
 
 			Room[,] cells = roomMgr.cells;
 			if (cells [cellX, cellY] != null && cells [cellX, cellY].monsters.Count < cells [cellX, cellY].capacity) {
-					room = cells [cellX, cellY];
+					room = cells [cellX, cellY]; targetRoom = room;
 					room.monsters.Add (this);
 					room.updateSprite ();
-
+					floor = cellY;
 					transform.localPosition = new Vector3 (transform.localPosition.x, transform.localPosition.y, 100.0f);
 			} else {
-				ground = 0.0f;
+				floor = -1; ground = 0.0f;
+				getTargetRoom ();
 			}
-			targetRoom = null; moveToRoom = null; path.Clear ();
+			moveToRoom = null; path.Clear (); 
+			 
 
 			transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
 			updateAI (true); print ("RESET");
@@ -140,32 +147,32 @@ public class Monster : MonoBehaviour {
 
 	// AI for the monster
 	void updateAI(bool reset) {
+		if (isLeaving && floor == -1) {
+			transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
+			boundsCheck();
+			return;
+		}
+
 		// Inside room? //
 		if (room != null) {
 			spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
-
 			if (fillNeed (room.room_type)) {
 				aiState = "BUSY";
 				return;
 			} else {
-				targetRoom = null;
+				getTargetRoom();
+				room.monsters.Remove (this); room.updateSprite ();
+				room = null;
 			}
 		}
 
 		// Get target room and next in path //
-		if (targetRoom == null) {
-			// Get a target room //
-			getTargetRoom();
-		} else {
+		if (targetRoom != null) {
 			// Follow path //
 			if (moveToRoom == null) {
 				// Change monster to gray to show that it is outside room
 				if (room == null && sleepNeed > 0) {
 					spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-				} else if (room == null) {
-					spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.65f);
-					speed = 0.04f;
-					isLeaving = true;
 				}
 
 				// Follow path to next in path //
@@ -192,9 +199,19 @@ public class Monster : MonoBehaviour {
 				transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
 			} else {
 				// Try and enter, if full, wait //
+
 				if (moveToRoom.Enter (this)) {
+
 					room = moveToRoom; moveToRoom = null;
 					collisionCheck ();
+					if (room.room_type == "lobby" && sleepNeed <= 0) {
+						floor = -1;
+						room.monsters.Remove (this);
+						room.updateSprite ();
+						room = null; isLeaving = true;
+						spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.65f);
+						speed = 0.04f;
+					}
 				} else
 					animator.Play ("idle", -1, float.NegativeInfinity);
 			}
@@ -233,14 +250,17 @@ public class Monster : MonoBehaviour {
 	}
 
 	void getTargetRoom() {
+		targetRoom = null;
 		if (room != null) {
 			monsterManager.matchMonster(this);
 		} else {
 			targetRoom = roomMgr.getNearestLobby(transform.localPosition.x);
 		}
+
 		if (targetRoom != null) {
 			room.monsters.Remove (this);
 			room.updateSprite ();
+			roomMgr.matchmaker.matchRoom (room);
 			room = null;
 		} else {
 			aiState = "IDLE";
@@ -383,8 +403,17 @@ public class Monster : MonoBehaviour {
 		return returnNeeds;
 	}
 
-	public Queue<Shaft> getReachableShafts() {
-		Queue<Shaft> returnShafts = null;
+	public List<Shaft> getReachableShafts() {
+		List<Shaft> returnShafts;
+
+		if (floor == -1) {
+			returnShafts = roomMgr.getReachableShaftsAt (0, 0);
+		} else {
+			int cellX = Mathf.FloorToInt (transform.localPosition.x / 2.0f + 0.5f);
+
+			returnShafts = roomMgr.getReachableShaftsAt (cellX, floor);
+		}
+		
 
 		return returnShafts;
 	}

@@ -120,6 +120,7 @@ public class Room : MonoBehaviour {
 	public virtual bool Enter(Monster mon) {
 		if (monsters.Count < capacity) {
 			monsters.Add (mon);
+			mon.floor = cellY;
 			updateSprite ();
 			return true;
 		} else {

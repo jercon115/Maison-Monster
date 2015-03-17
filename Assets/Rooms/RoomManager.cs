@@ -15,8 +15,6 @@ public class RoomManager : MonoBehaviour {
 	public void Start () {
 		cells = new Room[hotel.width, hotel.height];
 		lobbies = new List<Room> ();
-
-		path = null; // TEST STACK FOR PATH
 	}
 
 	public void MakeRoom(int x, int y, Room newroom) {
@@ -283,55 +281,40 @@ public class RoomManager : MonoBehaviour {
 		return path;
 	}
 
+	public bool isDirectlyReachable(int x1, int y1, int x2, int y2) {
+		List<Shaft> returnShafts = new List<Shaft>();
+
+		if (y1 != y2)
+			return false;
+
+		if (x1 == x2)
+			return true;
+
+		int y = y1;
+
+		if (y == 0) // everything reachable on ground
+			return true;
+
+		int i = x1-1; // Move left?
+		while(i > x2) {
+			if (cells[i, y] == null) return false;
+			i--;
+		}
+
+		i = x1+1; // Move right?
+		while(i < x2) {
+			if (cells[i, y] == null) return false;
+			i++;
+		}
+		
+		return true;
+	}
+
 	private Vector2 getMouseCell() {
 		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		int x = Mathf.FloorToInt (mousePos.x/2.0f + 0.5f);
 		int y = Mathf.FloorToInt (mousePos.y/2.0f + 0.5f);
 
 		return new Vector2 (x, y);
-	}
-
-	public Stack<Shaft> path; // TEST STACK FOR PATH
-
-	void Update() {
-		Vector2 mouseCell;
-		int x, y;
-
-		if (Input.GetKeyDown (KeyCode.Q)) {
-			mouseCell = getMouseCell ();
-			x = (int)mouseCell.x; y = (int)mouseCell.y;
-
-			if (x >= 0 && x < hotel.width && y >= 0 && y < hotel.height)
-				calculateShaftDistances (x, y);
-		} else {
-			if (Input.GetKeyDown (KeyCode.E)){
-				mouseCell = getMouseCell ();
-				x = (int)mouseCell.x; y = (int)mouseCell.y;
-				
-				if (x >= 0 && x < hotel.width && y >= 0 && y < hotel.height)
-					path = createPathFromShaftDistances (x,y);
-			}
-		}
-
-		if (path != null)
-			drawPath ();
-	}
-
-	private void drawPath() {
-		if (path.Count == 0)
-			return;
-
-		Stack<Shaft> drawStack = new Stack<Shaft> (path);
-
-		Shaft shaft = drawStack.Pop ();
-		Vector3 drawPos = shaft.transform.localPosition + new Vector3(0.0f,0.5f,0.0f);
-
-		while (drawStack.Count > 0) {
-			shaft = drawStack.Pop ();
-			Vector3 nextPos = shaft.transform.localPosition+ new Vector3(0.0f,0.5f,0.0f);
-
-			Debug.DrawLine (drawPos, nextPos, Color.red, Time.deltaTime, false);
-			drawPos = nextPos;
-		}
 	}
 }

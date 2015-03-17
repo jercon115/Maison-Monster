@@ -337,20 +337,18 @@ public class Shaft : Room {
 
 	// Enter monster, see where he needs to go
 	public override bool Enter(Monster mon) {
-		if (monsters.Count < capacity) {
-			Shaft next = mon.path.Peek ();
-			if (next == null) {
-				mon.targetY = mon.targetRoom.cellY;
-			} else {
-				mon.targetY = getConnectionFloor (next, mon.room.cellY);
-			}
-
-			monsters.Add (mon);
-			updateSprite ();
-			return true;
+		print ("TEST");
+		if (mon.path.Count == 0) {
+			mon.targetY = mon.targetRoom.cellY;
 		} else {
-			return false;
+			Shaft next = mon.path.Peek ();
+			mon.targetY = getConnectionFloor (next, mon.floor);
 		}
+
+		mon.floor = cellY;
+		monsters.Add (mon);
+		updateSprite ();
+		return true;
 	}
 
 	void Update() {
@@ -359,12 +357,12 @@ public class Shaft : Room {
 		Queue<Monster> removeMonsters = new Queue<Monster>();
 		foreach (Monster monster in monsters) {
 			float monY = monster.transform.localPosition.y;
-			float toY = monster.targetY*2.0f;
+			float toY = monster.targetY*2.0f-1.0f;
 			float speed = 0.05f;
 
 			if  (Mathf.Abs (monY-toY) <= speed) {
 				monster.transform.Translate (new Vector3(0.0f,toY-monY,0.0f));
-
+				monster.floor = monster.targetY;
 				// Monster reached target floor, remove froom
 				monster.room = null;
 				removeMonsters.Enqueue (monster);
@@ -372,10 +370,10 @@ public class Shaft : Room {
 				continue;
 			}
 
-			while(monY < toY)
+			if (monY < toY) {
 				monster.transform.Translate (new Vector3(0.0f,speed,0.0f));
 
-			while(monY > toY)
+			} else if (monY > toY)
 				monster.transform.Translate (new Vector3(0.0f,-speed,0.0f));
 		}
 

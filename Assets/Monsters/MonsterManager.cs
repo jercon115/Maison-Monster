@@ -10,6 +10,7 @@ public class MonsterManager : MonoBehaviour {
 	public Monster[] monster_types;
 
 	public bool spawnEnemies;
+	public int maxMonsters;
 
 	private List<Monster> monsters;
 
@@ -27,7 +28,7 @@ public class MonsterManager : MonoBehaviour {
 		if (!spawnEnemies || roomManager.lobbies.Count <= 0)
 			return;
 
-		if (monsters.Count < 1 && spawnDuration <= 0) {
+		if (monsters.Count < maxMonsters && spawnDuration <= 0) {
 			int randomMonster = Mathf.RoundToInt (Random.Range(0,monster_types.Length+1));
 			monsters.Add( Instantiate (monster_types[randomMonster]) as Monster );
 			monsters [monsters.Count - 1].monsterManager = this;
