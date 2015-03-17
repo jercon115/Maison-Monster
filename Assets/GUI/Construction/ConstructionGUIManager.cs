@@ -122,7 +122,7 @@ public class ConstructionGUIManager : MonoBehaviour {
 
 			target.transform.localPosition = new Vector3 (x, y, 10.0f);
 
-			if (hotel.roomManager.roomLocationValid (targetX, targetY, width, height)) {
+			if (hotel.roomManager.roomLocationValid (targetX, targetY, width, height, hotel.rooms[selected])) {
 					targetRenderer.color = new Color32 (255, 255, 255, 128);
 			} else {
 					targetRenderer.color = new Color32 (255, 0, 0, 128);

@@ -18,7 +18,7 @@ public class RoomManager : MonoBehaviour {
 	}
 
 	public void MakeRoom(int x, int y, Room newroom) {
-		if (roomLocationValid (x, y, newroom.width, newroom.height)) {
+		if (roomLocationValid (x, y, newroom.width, newroom.height, newroom)) {
 			Room tmpRoom = Instantiate (newroom) as Room;
 			tmpRoom.Construct (this, x, y);
 			switch (tmpRoom.room_type) {
@@ -43,9 +43,12 @@ public class RoomManager : MonoBehaviour {
 		}
 	}
 
-	public bool roomLocationValid(int x, int y, int width, int height) {
+	public bool roomLocationValid(int x, int y, int width, int height, Room newroom) {
 		if (x < 0 || x >= hotel.width-(width-1) || y < 0 || y >= hotel.height-(height-1))
 			return false;
+
+		if (newroom.room_type == "lobby" && y > 0)
+						return false;
 
 		bool foundation_exists = false;
 		for(int i = 0; i < width; i++) {

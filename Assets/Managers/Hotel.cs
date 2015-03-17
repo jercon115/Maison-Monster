@@ -60,7 +60,7 @@ public class Hotel : MonoBehaviour {
 	}
 
 	public void addStar (int num) {
-		if (numStars < 5) numStars += num;
+		if (numStars <= 5) numStars += num;
 		if (numStars  == 0) {
 			hud_stars[0].sprite = stars[0];
 			hud_stars[1].sprite = stars[0];

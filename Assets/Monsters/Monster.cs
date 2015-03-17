@@ -205,6 +205,7 @@ public class Monster : MonoBehaviour {
 				// Keep walking //
 				animator.Play ("walk", -1, float.NegativeInfinity);
 				transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
+				if (annoyance > 0) annoyance -= 1;
 			} else {
 				// Try and enter, if full, wait //
 
@@ -218,10 +219,15 @@ public class Monster : MonoBehaviour {
 						room = null; isLeaving = true;
 						speed = 0.04f;
 					}
-				} else
+				} else {
 					animator.Play ("idle", -1, float.NegativeInfinity);
+					if (annoyance < 500) {
+						annoyance += 1;
+					} else {
+						monsterManager.hotel.addHappiness(-0.2f);
+					}
+				}
 			}
-			if (annoyance > 0) annoyance -= 1;
 			return;
 		}
 
@@ -258,12 +264,11 @@ public class Monster : MonoBehaviour {
 		int needValue = getNeedValue (room_type);
 		if (needValue <= 0) return false;
 
+		float annoyanceHue = (500.0f - annoyance)/500.0f;
 		if (needValue % 50 == 0) {
 			int revenue = room.income;
 			
 			monsterManager.hotel.gold += revenue;
-
-			float annoyanceHue = (500.0f - annoyance)/500.0f;
 			if (room_type == "fun" || room_type == "eat" || room_type == "health") {
 				spriteRenderer.color = new Color(0f, 1f * annoyanceHue, 1f * annoyanceHue, 1f);
 				monsterManager.hotel.addHappiness (1.0f);
