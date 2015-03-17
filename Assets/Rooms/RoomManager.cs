@@ -123,6 +123,7 @@ public class RoomManager : MonoBehaviour {
 		// Queue to hold shafts found that connects to current floor
 		// and whose reachable ranges may need to be updated
 		Queue<Shaft> foundShafts = new Queue<Shaft>();
+		Queue<Room> foundAvailableRooms = new Queue<Room> ();
 
 		// Two integers to store leftmost and rightmost cells of current cluster
 		int leftmost = -1, rightmost = -1;
@@ -146,8 +147,10 @@ public class RoomManager : MonoBehaviour {
 				}
 
 				if (cells[i, j] != null) {
-					if (cells[i, j] is Shaft)
+					if (cells[i, j] is Shaft) {
 						foundShafts.Enqueue ((Shaft)cells[i,j]);
+					} else if (cells[i, j].monsters.Count < cells[i, j].capacity)
+						foundAvailableRooms.Enqueue (cells[i,j]);
 
 					if (leftmost == -1) {
 						leftmost = i; rightmost = i;
@@ -156,6 +159,8 @@ public class RoomManager : MonoBehaviour {
 				}
 
 				if (cells[i,j] == null || i == hotel.width-1) {
+					bool reachableRangesChanged = false;
+
 					while(foundShafts.Count > 0) {
 						Shaft shaft = foundShafts.Dequeue();
 						int index = j-shaft.cellY;
@@ -169,8 +174,17 @@ public class RoomManager : MonoBehaviour {
 							// Update shaft's reachable ranges
 							shaft.leftmostCells[index] = leftmost;
 							shaft.rightmostCells[index] = rightmost;
+
+							// Reachable ranges changed, a room may have been made reachable, try to match it later
+							reachableRangesChanged = true;
 						}
 					}
+
+					if (reachableRangesChanged) {
+						while(foundAvailableRooms.Count > 0)
+							matchmaker.matchRoom (foundAvailableRooms.Dequeue());
+					} else
+						foundAvailableRooms.Clear ();
 
 					// reset leftmost found cell and rightmost found cell (new cluster of cells)
 					leftmost = -1; rightmost = -1;
