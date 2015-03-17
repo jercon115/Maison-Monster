@@ -10,6 +10,7 @@ public class Monster : MonoBehaviour {
 
 	public Room targetRoom;
 	private Room moveToRoom;
+	private float moveToXPos;
 	public Stack<Shaft> path;
 
 	public int targetY; // for use with shafts
@@ -23,8 +24,8 @@ public class Monster : MonoBehaviour {
 
 	private int hotelWidth;
 	private float hotelBounds = 8.0f;
-	public float ground = 0.0f;
-	public int floor = -1;
+	public float ground;
+	public int floor;
 
 	private float speed;
 	private float velY;
@@ -34,9 +35,11 @@ public class Monster : MonoBehaviour {
 	private int aiStateDuration;
 	private int sleepNeed, eatNeed, funNeed;
 	private bool isLeaving;
+	private int annoyance;
 
 	// Use this for initialization
 	void Start () {
+		floor = -1; ground = 0.0f;
 		//Initialize variables
 		roomMgr = monsterManager.roomManager;
 
@@ -46,7 +49,7 @@ public class Monster : MonoBehaviour {
 
 		popupText = Resources.Load<PopupText>("Effects/Prefabs/Popup Text");
 		
-		speed = 0.01f; velY = 0.0f;
+		speed = 0.015f; velY = 0.0f;
 		aiState = "IDLE";
 		aiStateDuration = 0;
 		sleepNeed = 1000; eatNeed = 500; funNeed = 500;
@@ -97,6 +100,14 @@ public class Monster : MonoBehaviour {
 				                                      transform.localPosition.z);
 
 				updateAI(false);
+			}
+		}
+		// Change monster to gray to show that it is outside room
+		if (room == null) {
+			if (floor < 0) {
+				spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.65f);
+			} else {
+				spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
 			}
 		}
 	}
@@ -155,7 +166,6 @@ public class Monster : MonoBehaviour {
 
 		// Inside room? //
 		if (room != null) {
-			spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
 			if (fillNeed (room.room_type)) {
 				aiState = "BUSY";
 				return;
@@ -170,11 +180,6 @@ public class Monster : MonoBehaviour {
 		if (targetRoom != null) {
 			// Follow path //
 			if (moveToRoom == null) {
-				// Change monster to gray to show that it is outside room
-				if (room == null && sleepNeed > 0) {
-					spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-				}
-
 				// Follow path to next in path //
 				if (path.Count > 0) {
 					moveToRoom = path.Pop();
@@ -182,18 +187,19 @@ public class Monster : MonoBehaviour {
 				} else {
 					moveToRoom = targetRoom;
 				}
+				moveToXPos = Random.Range (moveToRoom.cellX * 2.0f - 0.5f, moveToRoom.cellX * 2.0f + (moveToRoom.width-1)*2.0f + 0.5f);
 			}
 		}
 
 		if (moveToRoom != null) {
 			// Move to x position to target room //
-			if (moveToRoom.getCenterXPos () > transform.localPosition.x) {
+			if (moveToXPos > transform.localPosition.x) {
 				transform.localScale = new Vector3 (1, 1, 1);
 			} else {
 				transform.localScale = new Vector3 (-1, 1, 1);
 			}
 			// At next room? //
-			if (Mathf.Abs (moveToRoom.getCenterXPos () - transform.localPosition.x) > moveToRoom.width) {
+			if (Mathf.Abs (moveToXPos - transform.localPosition.x) > 0.2) {
 				// Keep walking //
 				animator.Play ("walk", -1, float.NegativeInfinity);
 				transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
@@ -201,7 +207,6 @@ public class Monster : MonoBehaviour {
 				// Try and enter, if full, wait //
 
 				if (moveToRoom.Enter (this)) {
-
 					room = moveToRoom; moveToRoom = null;
 					collisionCheck ();
 					if (room.room_type == "lobby" && sleepNeed <= 0) {
@@ -209,7 +214,6 @@ public class Monster : MonoBehaviour {
 						room.monsters.Remove (this);
 						room.updateSprite ();
 						room = null; isLeaving = true;
-						spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f, 0.65f);
 						speed = 0.04f;
 					}
 				} else
@@ -218,33 +222,7 @@ public class Monster : MonoBehaviour {
 			return;
 		}
 
-		if (reset) {
-			aiState = "IDLE";
-			aiStateDuration = Random.Range (120, 240);
-			return;
-		}
-
-		if (room != null) {
-			if (aiStateDuration <= 0 && aiState != "BUSY") {
-				if (aiState != "MOVE") {
-					aiState = "MOVE";
-					aiStateDuration = Random.Range (60, 120);
-
-					transform.localScale = new Vector3 (1 - 2 * Random.Range (0, 2), 1, 1);
-
-					animator.Play ("walk", -1, float.NegativeInfinity);
-					transform.position += new Vector3 (speed * transform.localScale.x, 0, 0);
-					collisionCheck();
-				} else if (aiState != "IDLE") {
-					aiState = "IDLE";
-					aiStateDuration = Random.Range (120, 240);
-
-					animator.Play ("idle", -1, float.NegativeInfinity);
-				}
-			} else {
-				aiStateDuration -= 1;
-			}
-		}
+		if (annoyance < 500) annoyance += 1;
 
 		return;
 	}
@@ -265,7 +243,7 @@ public class Monster : MonoBehaviour {
 			}
 			room = null;
 		} else {
-			aiState = "IDLE";
+			animator.Play ("idle", -1, float.NegativeInfinity);
 		}
 	}
 
@@ -277,7 +255,14 @@ public class Monster : MonoBehaviour {
 			int revenue = room.income;
 			
 			monsterManager.hotel.gold += revenue;
-			
+
+			if (room_type == "fun" || room_type == "eat" || room_type == "health") {
+				spriteRenderer.color = new Color(0f, 1f, 1f, 1f);
+				monsterManager.hotel.addHappiness (1.0f);
+			} else {
+				spriteRenderer.color = new Color(1f, 1f, 1f, 1f);
+			}
+
 			Vector3 popUpPos = transform.localPosition; popUpPos.y += 1.0f; popUpPos.z = -5.0f;
 			PopupText newPopupText = Instantiate(popupText, popUpPos, Quaternion.identity) as PopupText;
 			newPopupText.text_display = "+" + revenue; newPopupText.text_color = Color.yellow;
@@ -324,8 +309,7 @@ public class Monster : MonoBehaviour {
 			if (sleepNeed > 0) { 
 				monsterManager.hotel.addHappiness (-200.0f);
 			} else {
-				if (eatNeed <= 0) monsterManager.hotel.addHappiness (50.0f);
-				if (funNeed <= 0) monsterManager.hotel.addHappiness (50.0f);
+
 			}
 			monsterManager.deleteMonster (this);
 		}

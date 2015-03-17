@@ -37,7 +37,7 @@ public class Room : MonoBehaviour {
 		cellX = x; cellY = y;
 		
 		spriteRenderer = GetComponent<SpriteRenderer>();
-		if (monsters.Count < capacity)
+		if (monsters.Count < capacity && room_type != "lobby")
 			spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
 		highlighted = false;
 		
@@ -103,7 +103,7 @@ public class Room : MonoBehaviour {
 
 	public void updateSprite() {
 		if (!highlighted) {
-			if (capacity == 0 || monsters.Count > 0) {
+			if (capacity == 0 || monsters.Count > 0 || room_type == "lobby") {
 				spriteRenderer.color = new Color (1f, 1f, 1f, 1f);
 			} else {
 				spriteRenderer.color = new Color (0.4f, 0.4f, 0.4f, 1f);
