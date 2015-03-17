@@ -71,7 +71,7 @@ public class Matchmaker : MonoBehaviour {
 			if (targetRoom != null) {
 				// If a reachable room was found, match is made
 				monster.targetRoom = targetRoom;
-				if (targetRoom.monsters.Count >= targetRoom.capacity)
+				if (targetRoom.monsters.Count + 1 >= targetRoom.capacity)
 					waitingRooms.Remove (targetRoom); // remove room from waiting list
 
 				// Create path
