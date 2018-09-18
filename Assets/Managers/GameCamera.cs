@@ -50,8 +50,8 @@ public class GameCamera : MonoBehaviour {
 		if (Input.GetKey (KeyCode.Minus)) {
 		    if (!minusDown)  {
 				minusDown = true;
-				if (camera.orthographicSize <= maxOrthoSize)
-					camera.orthographicSize++;
+				if (Camera.main.orthographicSize <= maxOrthoSize)
+                    Camera.main.orthographicSize++;
 			}
 		} else {
 			minusDown = false;
@@ -59,19 +59,19 @@ public class GameCamera : MonoBehaviour {
 		if (Input.GetKey (KeyCode.Equals)) {
 			if (!equalsDown)  {
 				equalsDown = true;
-				if (camera.orthographicSize >= minOrthoSize)
-					camera.orthographicSize--;
+				if (Camera.main.orthographicSize >= minOrthoSize)
+                    Camera.main.orthographicSize--;
 			}
 		} else {
 			equalsDown = false;
 		}
 		if (Input.GetAxis ("Mouse ScrollWheel") < 0) {
-			if (camera.orthographicSize <= maxOrthoSize)
-				camera.orthographicSize++;
+			if (Camera.main.orthographicSize <= maxOrthoSize)
+                Camera.main.orthographicSize++;
 		}
 		if (Input.GetAxis ("Mouse ScrollWheel") > 0) {
-			if (camera.orthographicSize >= minOrthoSize)
-				camera.orthographicSize--;
+			if (Camera.main.orthographicSize >= minOrthoSize)
+                Camera.main.orthographicSize--;
 		}
 	}
 }
